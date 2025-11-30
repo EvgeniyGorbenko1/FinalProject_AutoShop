@@ -1,5 +1,6 @@
 package com.tms.finalproject_autoshop.controller;
 
+import com.tms.finalproject_autoshop.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +17,10 @@ public class EmailController {
 
     @GetMapping("/notify")
     public ResponseEntity<String> notifyEmail() {
-        if(emailService.sendEmail()){
-            return new ResponseEntity<>("Email has been sent successfully", HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
+        emailService.sendEmail("",
+                "",
+                "");
+        return new ResponseEntity<>("Email sent successfully", HttpStatus.OK);
     }
+
 }

@@ -4,9 +4,10 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 import java.util.logging.Logger;
-
+@Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -28,7 +29,6 @@ public class EmailService {
             logger.info("Email sent successfully");
         } catch (MessagingException e){
             logger.info("Email sent failed");
-            e.printStackTrace();
         }
 
     }
