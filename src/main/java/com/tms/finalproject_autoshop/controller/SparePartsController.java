@@ -1,5 +1,8 @@
 package com.tms.finalproject_autoshop.controller;
 
+import com.tms.finalproject_autoshop.model.SpareParts;
+import com.tms.finalproject_autoshop.model.dto.PartDto;
+import com.tms.finalproject_autoshop.service.SparePartsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +20,8 @@ public class SparePartsController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Parts>> getAllSpareParts(){
-        List<Parts> spareParts = sparePartsService.getAllSpareParts;
+    public ResponseEntity<List<SpareParts>> getAllSpareParts(){
+        List<SpareParts> spareParts = sparePartsService.getAllSpareParts();
         if(spareParts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -26,17 +29,17 @@ public class SparePartsController {
     }
 
     @GetMapping("/spare-parts/{id}")
-    public ResponseEntity<Parts> getSparePartById(@PathVariable Long partId){
-        Optional<Parts> parts = sparePartsService.getSparePartById;
+    public ResponseEntity<SpareParts> getSparePartById(@PathVariable Long id){
+        Optional<SpareParts> parts = sparePartsService.getPartById(id);
         if(parts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(parts, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping
-    public ResponseEntity<Parts> updateParts(@RequestBody Parts parts){
-        Optional<Parts> updatedParts = sparePartsService.updateParts;
+    public ResponseEntity<SpareParts> updateParts(@RequestBody SpareParts spareParts){
+        Optional<SpareParts> updatedParts = sparePartsService.updateSpareParts(spareParts);
         if(updatedParts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -44,8 +47,8 @@ public class SparePartsController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus> createPart(@RequestBody Parts parts){
-        Boolean result = sparePartsService.createPart(parts);
+    public ResponseEntity<HttpStatus> createPart(@RequestBody PartDto spareParts){
+        Boolean result = sparePartsService.createPart(spareParts);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -53,8 +56,8 @@ public class SparePartsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deletePart(@PathVariable Long partId){
-        Boolean result = sparePartsService.deletePart(partId);
+    public ResponseEntity<HttpStatus> deletePart(@PathVariable Long id){
+        Boolean result = sparePartsService.deleteSparePart(id);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

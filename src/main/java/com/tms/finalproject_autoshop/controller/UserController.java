@@ -1,11 +1,16 @@
 package com.tms.finalproject_autoshop.controller;
 
+
+import com.tms.finalproject_autoshop.model.User;
+import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
+import com.tms.finalproject_autoshop.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.apache.catalina.User;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,21 +26,21 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
+    public ResponseEntity<User> createUser(@RequestBody UserCreateDto user){
         Boolean result = userService.createUser(user);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(user.get(), HttpStatus.CREATED)
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<User> getUserById(@PathVariable ("id") Long userId){
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable ("id") Long id) throws AccessDeniedException {
         Optional<User> user = userService.getUserById(id);
         if(user.isEmpty()){
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(user.get(), HttpStatus.OK)
+        return new ResponseEntity<>(user.get(), HttpStatus.OK);
 
     }
 
@@ -45,7 +50,7 @@ public class UserController {
         if(updatedUser.isEmpty()){
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK)
+        return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK);
     }
 
     @GetMapping
@@ -58,8 +63,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long userId)){
-        Boolean result = userService.deleteUser(userId);
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id){
+        Boolean result = userService.deleteUser(id);
         if(!result){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
