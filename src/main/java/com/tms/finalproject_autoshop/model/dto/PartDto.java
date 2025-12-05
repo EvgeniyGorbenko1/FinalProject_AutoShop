@@ -6,9 +6,12 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class PartDto {
+    private Long id;
     private String name;
-    private String description;
-    private double price;
+    private String brand;
+    private Double price;
     private String image;
-    private String category;
+    private Integer article;
+    private String carBrand;
+    private String catalog;
 }

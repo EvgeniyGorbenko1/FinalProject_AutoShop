@@ -13,13 +13,13 @@ import java.util.Collection;
 
 @Data
 @NoArgsConstructor
-@Entity(name = "original_parts")
+@Entity(name = "service_parts")
 @EqualsAndHashCode(exclude = {"catalog"})
 @ToString(exclude = {"catalog"})
-public class SpareParts {
+public class ServiceParts {
     @Id
-    @SequenceGenerator(name = "original_parts_generator", sequenceName = "original_parts_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "original_parts_generator")
+    @SequenceGenerator(name = "service_parts_generator", sequenceName = "service_parts_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "service_parts_generator")
     private Long id;
     private String name;
     private String brand;
