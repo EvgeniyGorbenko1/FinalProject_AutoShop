@@ -14,9 +14,11 @@ import java.util.Optional;
 @RequestMapping ("/catalog")
 public class SparePartsController {
     private final SparePartsService sparePartsService;
+    private final SpareParts spareParts;
 
-    public SparePartsController(SparePartsService sparePartsService) {
+    public SparePartsController(SparePartsService sparePartsService, SpareParts spareParts) {
         this.sparePartsService = sparePartsService;
+        this.spareParts = spareParts;
     }
 
     @GetMapping()
@@ -28,13 +30,13 @@ public class SparePartsController {
         return new ResponseEntity<>(spareParts, HttpStatus.OK);
     }
 
-    @GetMapping("/spare-parts/{id}")
-    public ResponseEntity<SpareParts> getSparePartById(@PathVariable Long id){
-        Optional<SpareParts> parts = sparePartsService.getPartById(id);
-        if(parts.isEmpty()){
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<SpareParts>> getSparePartById(@PathVariable Long id){
+        Optional<SpareParts> spareParts = sparePartsService.getPartById(id);
+        if(spareParts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(spareParts, HttpStatus.OK);
     }
 
     @PutMapping

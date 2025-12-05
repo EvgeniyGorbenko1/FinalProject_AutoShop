@@ -28,6 +28,7 @@ public class SparePartsService {
             newSparePart.setPrice(partDto.getPrice());
             newSparePart.setImage(partDto.getImage());
             newSparePart.setDescription(partDto.getDescription());
+            sparePartsRepository.save(newSparePart);
         } catch (Exception ex) {
             System.out.println("Error in saving user: " + ex.getMessage());
         }
