@@ -13,20 +13,19 @@ import java.util.Collection;
 
 @Data
 @NoArgsConstructor
-@Entity(name = "service_parts")
+@Entity(name = "spare_parts")
 @EqualsAndHashCode(exclude = {"catalog"})
 @ToString(exclude = {"catalog"})
-public class ServiceParts {
+public class SpareParts {
     @Id
-    @SequenceGenerator(name = "service_parts_generator", sequenceName = "service_parts_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "service_parts_generator")
+    @SequenceGenerator(name = "spare_parts_generator", sequenceName = "spare_parts_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "spare_parts_generator")
     private Long id;
     private String name;
-    private String brand;
+    private String description;
     private Double price;
     private String image;
-    private Integer article;
-    private String carBrand;
+    private String category;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "catalog_id")
