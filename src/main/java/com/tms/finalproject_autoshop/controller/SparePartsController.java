@@ -11,14 +11,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping ("/catalog")
+@RequestMapping ("/catalog/spare-parts")
 public class SparePartsController {
     private final SparePartsService sparePartsService;
-    private final SpareParts spareParts;
 
-    public SparePartsController(SparePartsService sparePartsService, SpareParts spareParts) {
+    public SparePartsController(SparePartsService sparePartsService) {
         this.sparePartsService = sparePartsService;
-        this.spareParts = spareParts;
     }
 
     @GetMapping()
