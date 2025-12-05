@@ -1,5 +1,6 @@
 package com.tms.finalproject_autoshop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,12 +9,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 @Data
 @NoArgsConstructor
-@Component
 @Entity(name = "spare_parts")
-@EqualsAndHashCode(exclude = {"users"})
-@ToString(exclude = {"users"})
+@EqualsAndHashCode(exclude = {"catalog"})
+@ToString(exclude = {"catalog"})
 public class SpareParts {
     @Id
     @SequenceGenerator(name = "spare_parts_generator", sequenceName = "spare_parts_id_seq", allocationSize = 1)
@@ -24,8 +26,10 @@ public class SpareParts {
     private Double price;
     private String image;
     private String category;
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "catalog_id")
+    private Catalog catalog;
 
-//    @JsonIgnore
-//    @ManyToOne
-//    private User user;
+
 }
