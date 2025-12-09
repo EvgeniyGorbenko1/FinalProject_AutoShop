@@ -2,8 +2,6 @@ package com.tms.finalproject_autoshop.service;
 
 import com.tms.finalproject_autoshop.model.Catalog;
 import com.tms.finalproject_autoshop.model.SpareParts;
-import com.tms.finalproject_autoshop.model.dto.CatalogDto;
-import com.tms.finalproject_autoshop.model.dto.PartDto;
 import com.tms.finalproject_autoshop.repository.CatalogRepository;
 import com.tms.finalproject_autoshop.repository.SparePartsRepository;
 import org.springframework.stereotype.Service;
@@ -20,44 +18,36 @@ public class CatalogService {
         this.catalogRepository = catalogRepository;
     }
 
-    public Boolean createCatalog(CatalogDto catalogDto) {
-        try {
-            Catalog newCatalog = new Catalog();
-            newCatalog.setName(catalogDto.getName());
-            newCatalog.setDescription(catalogDto.getDescription());
-            newCatalog.setImage(catalogDto.getImage());
 
-            catalogRepository.save(newCatalog);
-        } catch (Exception ex) {
-            System.out.println("Error in saving user: " + ex.getMessage());
-        }
-        return true;
+    public List<Catalog> getAllCatalog() {
+        return catalogRepository.findAll();
     }
 
     public Optional<Catalog> getCatalogById(Long id) {
         return catalogRepository.findById(id);
-
     }
 
-    public Optional<Catalog> updateCatalog(Catalog catalog) {
-        Optional<Catalog> updateCatalogDB = getCatalogById((long) catalog.getId());
-        if (updateCatalogDB.isPresent()) {
-            return Optional.of(catalogRepository.saveAndFlush(catalog));
+    public Boolean createCatalog(Catalog catalog) {
+        catalogRepository.save(catalog);
+        return true;
+    }
+
+    public Boolean deleteCatalogById(Long id) {
+        catalogRepository.deleteById(id);
+        return true;
+    }
+
+    public Optional<Catalog> updateCatalog(Catalog catalog, Long id) {
+        Catalog newCatalog = new Catalog();
+        if(catalogRepository.findById(id).isPresent()) {
+            newCatalog.setName(catalog.getName());
+            newCatalog.setDescription(catalog.getDescription());
+            newCatalog.setImage(catalog.getImage());
+            catalogRepository.save(newCatalog);
         } else {
-            throw new NullPointerException();
-        }
+            throw new RuntimeException("Catalog id not found");
+    }
+        return Optional.empty();
     }
 
-    public List<Catalog> getAllCatalogs() {
-        return catalogRepository.findAll();
-    }
-
-    public Boolean deleteCatalog(Long id) {
-        if(catalogRepository.existsById(id)) {
-            catalogRepository.deleteById(id);
-            return true;
-        } else{
-            throw new NullPointerException(); //TODO: exception
-        }
-    }
 }

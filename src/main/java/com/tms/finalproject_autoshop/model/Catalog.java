@@ -13,7 +13,7 @@ import java.util.List;
 @Entity(name = "catalog")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"spare-parts"})
+@EqualsAndHashCode(exclude = {"spare-parts","oil-parts"})
 @ToString(exclude = {"spare-parts"})
 public class Catalog {
     @Id
@@ -23,9 +23,13 @@ public class Catalog {
     private String name;
     private String image;
     private String description;
-    @JsonBackReference
-    @OneToMany(mappedBy = "catalog", fetch = FetchType.EAGER)
+//    @JsonBackReference
+    @OneToMany(mappedBy = "catalog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Collection<SpareParts> spareParts;
+    @OneToMany(mappedBy = "catalog", fetch = FetchType.EAGER)
+    private Collection<ServiceParts> serviceParts;
+    @OneToMany(mappedBy = "catalog", fetch = FetchType.EAGER)
+    private Collection<OilParts> oilParts;
 
 
 }
