@@ -40,6 +40,11 @@ public class SparePartsService {
 
     }
 
+    public List<SpareParts> getPartByCategory(String category) {
+        return sparePartsRepository.findByCategory(category);
+
+    }
+
     public Optional<SpareParts> updateSpareParts(SpareParts spareParts) {
         Optional<SpareParts> updatePartDB = getPartById(spareParts.getId());
         if (updatePartDB.isPresent()) {

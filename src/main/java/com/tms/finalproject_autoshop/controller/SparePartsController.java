@@ -28,6 +28,15 @@ public class SparePartsController {
         return new ResponseEntity<>(spareParts, HttpStatus.OK);
     }
 
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<SpareParts>>  getSparePartsByCategory(@PathVariable("category") String category){
+        List<SpareParts> sparePartsByCategory = sparePartsService.getPartByCategory(category);
+        if(sparePartsByCategory.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(sparePartsByCategory, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Optional<SpareParts>> getSparePartById(@PathVariable Long id){
         Optional<SpareParts> spareParts = sparePartsService.getPartById(id);
