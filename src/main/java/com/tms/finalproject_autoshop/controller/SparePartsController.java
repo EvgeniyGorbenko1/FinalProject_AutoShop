@@ -1,21 +1,17 @@
 package com.tms.finalproject_autoshop.controller;
 
-import com.tms.finalproject_autoshop.model.OilParts;
-import com.tms.finalproject_autoshop.model.ProductAbstract;
-import com.tms.finalproject_autoshop.model.ServiceParts;
 import com.tms.finalproject_autoshop.model.SpareParts;
-import com.tms.finalproject_autoshop.model.dto.ProductUpdateDto;
+import com.tms.finalproject_autoshop.model.dto.PartDto;
 import com.tms.finalproject_autoshop.service.SparePartsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
-@RequestMapping ("/catalog/product")
+@RequestMapping ("/catalog/spare-parts")
 public class SparePartsController {
     private final SparePartsService sparePartsService;
 
@@ -23,50 +19,54 @@ public class SparePartsController {
         this.sparePartsService = sparePartsService;
     }
 
-    @GetMapping("/{type}")
-    public ResponseEntity<?> getAllProducts(@PathVariable String type){
-        List<?> product = sparePartsService.getAllProducts(type);
-        if(product.isEmpty()){
+    @GetMapping()
+    public ResponseEntity<List<SpareParts>> getAllSpareParts(){
+        List<SpareParts> spareParts = sparePartsService.getAllSpareParts();
+        if(spareParts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(product, HttpStatus.OK);
+        return new ResponseEntity<>(spareParts, HttpStatus.OK);
     }
 
-    @GetMapping("/{type}/{id}")
-    public ResponseEntity<?> getSparePartById(@PathVariable String type, @PathVariable Long id){
-        Optional<?> product = sparePartsService.getProductById(type, id);
-        if(product.isEmpty()){
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<SpareParts>>  getSparePartsByCategory(@PathVariable("category") String category){
+        List<SpareParts> sparePartsByCategory = sparePartsService.getPartByCategory(category);
+        if(sparePartsByCategory.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(product, HttpStatus.OK);
+        return new ResponseEntity<>(sparePartsByCategory, HttpStatus.OK);
     }
 
-    @PutMapping("/{type}/{id}")
-    public ResponseEntity<?> updateServiceParts(@PathVariable String type, @PathVariable Long id, @RequestBody ProductAbstract product){
-        Optional<?> updatedParts = sparePartsService.updateProduct(type,id, product);
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<SpareParts>> getSparePartById(@PathVariable Long id){
+        Optional<SpareParts> spareParts = sparePartsService.getPartById(id);
+        if(spareParts.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(spareParts, HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<SpareParts> updateParts(@RequestBody SpareParts spareParts){
+        Optional<SpareParts> updatedParts = sparePartsService.updateSpareParts(spareParts);
         if(updatedParts.isEmpty()){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(updatedParts.get(), HttpStatus.OK);
     }
 
-
-    @PostMapping("/{type}")
-    public ResponseEntity<?> createSpareParts(@PathVariable String type , @RequestBody ProductAbstract product){
-        try{
-            Optional<?> newPart = sparePartsService.createSparePart(type, product);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch(Exception e){
-            // Вывод ошибки в консоль для отладки
-            // Возвращаем более информативный ответ
-            return new ResponseEntity<>("Conflict: " + e.getMessage(), HttpStatus.CONFLICT);
+    @PostMapping
+    public ResponseEntity<HttpStatus> createPart(@RequestBody PartDto spareParts){
+        Boolean result = sparePartsService.createPart(spareParts);
+        if(!result){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-
-    @DeleteMapping("/{type}/{id}")
-    public ResponseEntity<?> deletePart(@PathVariable String type, @PathVariable Long id){
-        Boolean result = sparePartsService.deleteProductById(type, id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deletePart(@PathVariable Long id){
+        Boolean result = sparePartsService.deleteSparePart(id);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
