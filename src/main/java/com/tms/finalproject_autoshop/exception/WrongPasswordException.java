@@ -1,0 +1,13 @@
+package com.tms.finalproject_autoshop.exception;
+
+public class WrongPasswordException extends Exception {
+    private final String wrongPassword;
+    public WrongPasswordException(String wrongPassword) {
+        this.wrongPassword = wrongPassword;
+    }
+
+    @Override
+    public String getMessage() {
+        return "Wrong Password" + wrongPassword;
+    }
+}
