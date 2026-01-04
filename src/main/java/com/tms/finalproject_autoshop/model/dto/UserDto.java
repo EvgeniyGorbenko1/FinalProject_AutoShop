@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class UserCreateDto {
+public class UserDto {
     private String firstName;
     private String secondName;
     private String email;

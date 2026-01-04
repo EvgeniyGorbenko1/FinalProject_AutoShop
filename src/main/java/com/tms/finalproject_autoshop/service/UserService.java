@@ -1,15 +1,17 @@
 package com.tms.finalproject_autoshop.service;
 
 import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
+import com.tms.finalproject_autoshop.model.dto.UserDto;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+
 @Service
 public class UserService {
 
@@ -21,7 +23,8 @@ public class UserService {
         //this.securityService = securityService;
     }
 
-    public Boolean createUser(UserCreateDto userCreateDto) {
+    @Transactional
+    public Boolean createUser(UserDto userCreateDto) {
         try {
             User newUser = new User();
             newUser.setFirstName(userCreateDto.getFirstName());
@@ -42,10 +45,11 @@ public class UserService {
 
     }
 
+    @Transactional
     public Optional<User> updateUser(User user) {
         Optional<User> updateUser = getUserById(user.getId());
         if (updateUser.isPresent()) {
-                return Optional.of(userRepository.saveAndFlush(user));
+            return Optional.of(userRepository.saveAndFlush(user));
         } else {
             throw new NullPointerException();
         }
@@ -56,12 +60,12 @@ public class UserService {
     }
 
     public Boolean deleteUser(Long id) {
-            if(userRepository.existsById(id)) {
-                userRepository.deleteById(id);
-                return true;
-            } else{
-                throw new NullPointerException(); //TODO: exception
-            }
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        } else {
+            throw new NullPointerException(); //TODO: exception
+        }
     }
 
 

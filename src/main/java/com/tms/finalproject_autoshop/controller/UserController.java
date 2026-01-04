@@ -2,12 +2,14 @@ package com.tms.finalproject_autoshop.controller;
 
 
 import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
+
+import com.tms.finalproject_autoshop.model.dto.UserDto;
 import com.tms.finalproject_autoshop.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -24,16 +26,16 @@ public class UserController {
     public UserController(UserService userService){
         this.userService = userService;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserCreateDto user){
+    public ResponseEntity<User> createUser(@RequestBody UserDto user){
         Boolean result = userService.createUser(user);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable ("id") Long id) throws AccessDeniedException {
         Optional<User> user = userService.getUserById(id);
@@ -43,7 +45,7 @@ public class UserController {
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
 
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<User> updateUser(@RequestBody User user){
         Optional<User> updatedUser = userService.updateUser(user);
@@ -52,7 +54,7 @@ public class UserController {
         }
         return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers(){
         List<User> user = userService.getAllUsers();
@@ -61,7 +63,7 @@ public class UserController {
         }
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id){
         Boolean result = userService.deleteUser(id);
