@@ -7,6 +7,7 @@ import com.tms.finalproject_autoshop.model.dto.PartDto;
 import com.tms.finalproject_autoshop.service.SparePartsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class SparePartsController {
         }
         return new ResponseEntity<>(spareParts, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<SpareParts> updateParts(@RequestBody SpareParts spareParts) {
         Optional<SpareParts> updatedParts = sparePartsService.updateSpareParts(spareParts);
@@ -71,7 +72,7 @@ public class SparePartsController {
         }
         return new ResponseEntity<>(updatedParts.get(), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<HttpStatus> createPart(@RequestBody PartDto spareParts) {
         Boolean result = sparePartsService.createPart(spareParts);
@@ -80,7 +81,7 @@ public class SparePartsController {
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deletePart(@PathVariable Long id) {
         Boolean result = sparePartsService.deleteSparePart(id);

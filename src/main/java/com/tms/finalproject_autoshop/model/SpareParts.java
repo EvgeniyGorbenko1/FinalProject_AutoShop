@@ -1,15 +1,16 @@
 package com.tms.finalproject_autoshop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.stereotype.Component;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.util.Collection;
+import java.math.BigDecimal;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -23,9 +24,16 @@ public class SpareParts {
     private Long id;
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private String image;
-    private String category;
+    private Integer stock;
+    @Enumerated(EnumType.STRING)
+    private Category category;
+    //Характеристики продукта
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> specifications;
+
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "catalog_id")
