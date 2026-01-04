@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ import java.util.List;
 public class FileController {
 
     private final Path ROOT_FILE_PATH = Paths.get("data");
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<HttpStatusCode> upload(@RequestParam("filename") MultipartFile multipartFile) {
         try {
@@ -46,7 +47,7 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{filename}")
     public ResponseEntity<Resource> download(@PathVariable String filename) {
         Path pathToFile = ROOT_FILE_PATH.resolve(filename);
@@ -64,7 +65,7 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @Hidden
     @GetMapping
     public ResponseEntity<List<String>> getAllFileNames() {
@@ -80,7 +81,7 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "remove-endpoints")
     @DeleteMapping("/{filename}")
     public ResponseEntity<String> delete(@PathVariable String filename) {
