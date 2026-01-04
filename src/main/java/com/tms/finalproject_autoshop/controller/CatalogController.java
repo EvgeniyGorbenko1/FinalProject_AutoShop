@@ -1,9 +1,14 @@
 package com.tms.finalproject_autoshop.controller;
 
 import com.tms.finalproject_autoshop.model.Catalog;
+import com.tms.finalproject_autoshop.model.SpareParts;
+import com.tms.finalproject_autoshop.model.dto.CatalogDto;
+import com.tms.finalproject_autoshop.model.dto.PartDto;
 import com.tms.finalproject_autoshop.service.CatalogService;
+import com.tms.finalproject_autoshop.service.SparePartsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +25,7 @@ public class CatalogController {
 
     @GetMapping()
     public ResponseEntity<List<Catalog>> getAllSpareParts(){
-        List<Catalog> catalogs = catalogService.getAllCatalog();
+        List<Catalog> catalogs = catalogService.getAllCatalogs();
         if(catalogs.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -35,28 +40,28 @@ public class CatalogController {
         }
         return new ResponseEntity<>(catalog, HttpStatus.OK);
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Optional<Catalog>> updateCatalog(@RequestBody Catalog catalog, @PathVariable Long id){
-        Optional<Catalog> updatedCatalog = catalogService.updateCatalog(catalog, id);
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping
+    public ResponseEntity<Catalog> updateCatalog(@RequestBody Catalog catalog){
+        Optional<Catalog> updatedCatalog = catalogService.updateCatalog(catalog);
         if(updatedCatalog.isEmpty()){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(updatedCatalog, HttpStatus.OK);
+        return new ResponseEntity<>(updatedCatalog.get(), HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<HttpStatus> createCatalog(@RequestBody Catalog catalog){
-        Boolean result = catalogService.createCatalog(catalog);
+    public ResponseEntity<HttpStatus> createCatalog(@RequestBody CatalogDto catalogDto){
+        Boolean result = catalogService.createCatalog(catalogDto);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteCatalog(@PathVariable Long id){
-        Boolean result = catalogService.deleteCatalogById(id);
+        Boolean result = catalogService.deleteCatalog(id);
         if(!result){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

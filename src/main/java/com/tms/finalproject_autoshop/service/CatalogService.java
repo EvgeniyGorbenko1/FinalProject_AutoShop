@@ -40,7 +40,7 @@ public class CatalogService {
     }
 
     public Optional<Catalog> updateCatalog(Catalog catalog) {
-        Optional<Catalog> updateCatalogDB = getCatalogById((long) catalog.getId());
+        Optional<Catalog> updateCatalogDB = getCatalogById(catalog.getId());
         if (updateCatalogDB.isPresent()) {
             return Optional.of(catalogRepository.saveAndFlush(catalog));
         } else {
