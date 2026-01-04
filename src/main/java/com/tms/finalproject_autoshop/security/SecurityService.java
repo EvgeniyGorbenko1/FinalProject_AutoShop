@@ -5,20 +5,25 @@ import com.tms.finalproject_autoshop.exception.WrongPasswordException;
 import com.tms.finalproject_autoshop.model.Role;
 import com.tms.finalproject_autoshop.model.Security;
 import com.tms.finalproject_autoshop.model.User;
+import com.tms.finalproject_autoshop.model.VerificationToken;
 import com.tms.finalproject_autoshop.model.dto.AuthRequest;
 import com.tms.finalproject_autoshop.model.dto.UserRegistrationDto;
 import com.tms.finalproject_autoshop.repository.SecurityRepository;
+import com.tms.finalproject_autoshop.repository.TokenRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import com.tms.finalproject_autoshop.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Transaction;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -28,24 +33,27 @@ public class SecurityService {
     private final SecurityRepository securityRepository;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     public SecurityService(UserService userService,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
                            SecurityRepository securityRepository,
-                           JwtUtils jwtUtils, UserRepository userRepository) {
+                           JwtUtils jwtUtils, UserRepository userRepository, TokenRepository tokenRepository) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.securityRepository = securityRepository;
         this.jwtUtils = jwtUtils;
         this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
     }
 
+    @Transactional
     public boolean registration(UserRegistrationDto userRegistrationDto) throws UsernameUsedException {
         log.info("Registration User" + userRegistrationDto.getEmail());
         if (isUsernameUsed(userRegistrationDto.getUsername())) {
             throw new UsernameUsedException(userRegistrationDto.getUsername());
         }
-        try{
+        try {
             User user = new User();
             user.setFirstName(userRegistrationDto.getFirstName());
             user.setLastName(userRegistrationDto.getLastName());
@@ -63,14 +71,15 @@ public class SecurityService {
 
             securityRepository.save(security);
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
 
     public boolean isUsernameUsed(String username) {
-       return securityRepository.existsByUsername(username);
+        return securityRepository.existsByUsername(username);
     }
 
     public Optional<Security> getSecurityById(Long id) {
@@ -78,26 +87,48 @@ public class SecurityService {
     }
 
     public Boolean setRoleToAdmin(Long id) {
-        if (!userRepository.existsById(id)){
+        if (!userRepository.existsById(id)) {
             throw new UsernameNotFoundException("username not found");
         }
-           return securityRepository.setAdminRoleByUserId(id) > 0;
+        return securityRepository.setAdminRoleByUserId(id) > 0;
 
     }
 
     public List<Security> getAllSecurityByRole(String role) {
-       return securityRepository.customFindByRole(role);
+        return securityRepository.customFindByRole(role);
     }
 
     public Optional<String> generateJwt(AuthRequest authRequest) throws WrongPasswordException {
         Optional<Security> security = securityRepository.getByUsername(authRequest.getUsername());
-        if(security.isEmpty()){
+        if (security.isEmpty()) {
             throw new UsernameNotFoundException("username not found" + authRequest.getUsername());
         }
-        if(!bCryptPasswordEncoder.matches(authRequest.getPassword(), security.get().getPassword())){
+        if (!bCryptPasswordEncoder.matches(authRequest.getPassword(), security.get().getPassword())) {
             throw new WrongPasswordException(authRequest.getPassword());
         }
 
         return Optional.ofNullable(jwtUtils.getToken(security.get().getUsername()));
+    }
+
+    public Optional<VerificationToken> findByToken(String token) {
+        return tokenRepository.findByToken(token);
+    }
+
+    public String createVerificationToken(String username) {
+        Security security = securityRepository.getByUsername(username)
+                .orElseThrow();
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setSecurity(security);
+        verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+        tokenRepository.save(verificationToken);
+        return token;
+    }
+
+    public String getTokenByUsername(String username) {
+        VerificationToken verificationToken = tokenRepository.findTokenBySecurityUsername(username)
+                .orElseThrow(() -> new RuntimeException("username not found"));
+        return verificationToken.getToken();
     }
 }
