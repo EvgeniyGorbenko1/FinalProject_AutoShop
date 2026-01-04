@@ -4,9 +4,12 @@ import com.tms.finalproject_autoshop.exception.UsernameUsedException;
 import com.tms.finalproject_autoshop.exception.WrongPasswordException;
 import com.tms.finalproject_autoshop.model.Role;
 import com.tms.finalproject_autoshop.model.Security;
+import com.tms.finalproject_autoshop.model.VerificationToken;
 import com.tms.finalproject_autoshop.model.dto.AuthRequest;
 import com.tms.finalproject_autoshop.model.dto.AuthResponse;
 import com.tms.finalproject_autoshop.model.dto.UserRegistrationDto;
+import com.tms.finalproject_autoshop.repository.SecurityRepository;
+import com.tms.finalproject_autoshop.repository.TokenRepository;
 import com.tms.finalproject_autoshop.service.EmailService;
 import com.tms.finalproject_autoshop.service.UserService;
 
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.xml.bind.ValidationException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,14 +35,16 @@ import java.util.Optional;
 @RestController
 public class SecurityController {
 
+    private final SecurityRepository securityRepository;
     public SecurityService securityService;
     public UserService userService;
     public EmailService emailService;
 
-    public SecurityController(SecurityService securityService, UserService userService, EmailService emailService) {
+    public SecurityController(SecurityService securityService, UserService userService, EmailService emailService, SecurityRepository securityRepository) {
         this.securityService = securityService;
         this.userService = userService;
         this.emailService = emailService;
+        this.securityRepository = securityRepository;
     }
 
     @PostMapping("/jwt")
@@ -84,6 +90,7 @@ public class SecurityController {
     @PostMapping("/registration")
     public ResponseEntity<HttpStatusCode> registration(@Valid @RequestBody UserRegistrationDto userRegistrationDto,
                                                        BindingResult bindingResult) throws UsernameUsedException {
+
         if (bindingResult.hasErrors()) {
             List<String> errMessages = new ArrayList<>();
 
@@ -94,7 +101,8 @@ public class SecurityController {
             throw new jakarta.validation.ValidationException(String.valueOf(errMessages));
         }
         if (securityService.registration(userRegistrationDto)) {
-            return emailService.sendEmail(userRegistrationDto.getEmail(), "Добро Пожаловать!", "<h1>Привет, " + userRegistrationDto.getFirstName() + "!</h1> Спасибо за регистрацию.");
+            securityService.createVerificationToken(userRegistrationDto.getUsername());
+            return emailService.sendEmail(userRegistrationDto.getEmail(), "Добро Пожаловать!", userRegistrationDto.getEmail() + "Подтверждение регистрации" + "<h1>Привет, " + userRegistrationDto.getFirstName() + "!</h1>" + "<p>Для завершения регистрации перейдите по ссылке:</p>" + "<a href=http://localhost:8081/security/confirm?token=" + securityService.getTokenByUsername(userRegistrationDto.getUsername()) + ">Подтвердить email</a>");
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
@@ -107,6 +115,26 @@ public class SecurityController {
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<String> confirm(@RequestParam String token) {
+        Optional<VerificationToken> optionalToken = securityService.findByToken(token);
+
+        if (optionalToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+        }
+
+        VerificationToken verificationToken = optionalToken.get();
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
+        }
+        Security security = optionalToken.get().getSecurity();
+        security.setIsEnabled(true);
+        securityRepository.save(security);
+        return ResponseEntity.ok("Email confirmed successfully");
+    }
+
 
 
 }

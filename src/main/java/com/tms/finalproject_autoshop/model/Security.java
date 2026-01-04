@@ -17,6 +17,7 @@ public class Security {
     @SequenceGenerator(name = "security_generator", sequenceName = "security_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "security_generator")
     private Long id;
+    @Column(unique = true)
     private String username;
 
     @JsonIgnore
@@ -25,7 +26,9 @@ public class Security {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
+
+    private Boolean isEnabled = false;
 }

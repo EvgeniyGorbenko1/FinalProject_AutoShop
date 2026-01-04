@@ -40,12 +40,9 @@ public class SecurityConfig {
                                 .requestMatchers(pathBuilder.matcher("/swagger-ui/**")).permitAll() //TODO: нужно указать ADMIN но мы не указали потому что в браузере нельзя просто добавить хедер
                                 .requestMatchers(pathBuilder.matcher("/v3/api-docs/**")).permitAll() //TODO: нужно указать ADMIN но мы не указали потому что в браузере нельзя просто добавить хедер
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.POST, "/security/jwt")).permitAll()
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user")).permitAll()
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user/sort/**")).hasRole(Role.ADMIN.name())
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user/pagination/**")).hasRole(Role.ADMIN.name())
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user/myself")).hasAnyRole(Role.USER.name(), Role.ADMIN.name(), Role.MODERATOR.name())
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user/**")).permitAll()
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/user/myself")).hasAnyRole(Role.USER.name(), Role.ADMIN.name(), Role.MODERATOR.name())
+                                .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/security/confirm")).permitAll()
+                                .requestMatchers(pathBuilder.matcher(HttpMethod.DELETE, "/cart/delete")).permitAll()
+                                .requestMatchers(pathBuilder.matcher(HttpMethod.PATCH, "/{orderId}/status")).permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
