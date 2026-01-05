@@ -1,6 +1,12 @@
 package com.tms.finalproject_autoshop.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -30,12 +36,27 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/file")
+@Tag(name = "File", description = "File upload, download and management")
+@SecurityRequirement(name = "Bearer Authentication")
 public class FileController {
 
     private final Path ROOT_FILE_PATH = Paths.get("data");
+
+    @Operation(
+            summary = "Upload a file",
+            description = "Uploads a file to the server storage",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "File uploaded successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid or empty file"),
+                    @ApiResponse(responseCode = "409", description = "File upload error")
+            }
+    )
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
-    public ResponseEntity<HttpStatusCode> upload(@RequestParam("filename") MultipartFile multipartFile) {
+    public ResponseEntity<HttpStatusCode> upload(
+            @Parameter(description = "File to upload")
+            @RequestParam("filename") MultipartFile multipartFile) {
+
         try {
             if (multipartFile == null || multipartFile.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -47,16 +68,30 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
+
+    @Operation(
+            summary = "Download a file",
+            description = "Downloads a file by its name",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "File downloaded",
+                            content = @Content(schema = @Schema(type = "string", format = "binary"))),
+                    @ApiResponse(responseCode = "404", description = "File not found")
+            }
+    )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{filename}")
-    public ResponseEntity<Resource> download(@PathVariable String filename) {
+    public ResponseEntity<Resource> download(
+            @Parameter(description = "Name of the file to download")
+            @PathVariable String filename) {
+
         Path pathToFile = ROOT_FILE_PATH.resolve(filename);
 
         try {
             Resource resource = new UrlResource(pathToFile.toUri());
             if (resource.exists() || resource.isReadable()) {
                 HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
+                headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + resource.getFilename() + "\"");
 
                 return new ResponseEntity<>(resource, headers, HttpStatus.OK);
             }
@@ -65,8 +100,9 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+
     @Hidden
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<String>> getAllFileNames() {
         try {
@@ -81,13 +117,24 @@ public class FileController {
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @Tag(name = "remove-endpoints")
-    @DeleteMapping("/{filename}")
-    public ResponseEntity<String> delete(@PathVariable String filename) {
-        Path pathToFile = ROOT_FILE_PATH.resolve(filename);
 
+    @Operation(
+            summary = "Delete a file",
+            description = "Deletes a file by its name",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "File deleted"),
+                    @ApiResponse(responseCode = "404", description = "File not found")
+            }
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{filename}")
+    public ResponseEntity<String> delete(
+            @Parameter(description = "Name of the file to delete")
+            @PathVariable String filename) {
+
+        Path pathToFile = ROOT_FILE_PATH.resolve(filename);
         File file = new File(pathToFile.toString());
+
         if (file.exists()) {
             if (file.delete()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
