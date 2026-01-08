@@ -1,13 +1,10 @@
 package com.tms.finalproject_autoshop.model.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@AllArgsConstructor
 @Data
-public class UserDto {
+public class UserUpdateDto {
     private String firstName;
-    private String secondName;
+    private String lastName;
     private String email;
-    private int age;
 }

@@ -1,7 +1,10 @@
 package com.tms.finalproject_autoshop.controller;
 
 import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.model.dto.UserDto;
+import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
+import com.tms.finalproject_autoshop.model.dto.UserUpdateDto;
+import com.tms.finalproject_autoshop.security.CustomUserDetailService;
+import com.tms.finalproject_autoshop.security.CustomUserDetails;
 import com.tms.finalproject_autoshop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,13 +45,13 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<User> createUser(
-            @Parameter(description = "User DTO") @RequestBody UserDto user) {
+            @Parameter(description = "User DTO") @RequestBody UserCreateDto user) {
 
         Boolean result = userService.createUser(user);
         if (!result) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(
@@ -65,8 +69,8 @@ public class UserController {
             @Parameter(description = "User ID") @PathVariable("id") Long id) {
 
         Optional<User> user = userService.getUserById(id);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return user.map(value -> ResponseEntity.ok().body(value))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(
@@ -77,14 +81,16 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             }
     )
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping()
     public ResponseEntity<User> updateUser(
-            @Parameter(description = "Updated user object") @RequestBody User user) {
-
-        Optional<User> updatedUser = userService.updateUser(user);
-        return updatedUser.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            @Parameter(description = "Updated user object") @RequestBody UserUpdateDto userUpdateDto) {
+        Long userId = CustomUserDetailService.getUserId();
+        Boolean result = userService.updateUser(userUpdateDto, userId);
+        if (!result) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Operation(
@@ -100,9 +106,9 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> user = userService.getAllUsers();
         if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok(user);
     }
 
     @Operation(
@@ -120,8 +126,26 @@ public class UserController {
 
         Boolean result = userService.deleteUser(id);
         if (!result) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/sort/{field}")
+    public ResponseEntity<List<User>> getSortedUsersByField(@PathVariable("field") String field, @RequestParam("order") String order) {
+        List<User> users = userService.getSortedUsersByField(field, order);
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/pagination/{page}/{size}")
+    public ResponseEntity<Page<User>> getAllUsersWithPagination(@PathVariable("page") int page, @PathVariable("size") int size) {
+        Page<User> users = userService.getAllUsersWithPagination(page, size);
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(users);
     }
 }

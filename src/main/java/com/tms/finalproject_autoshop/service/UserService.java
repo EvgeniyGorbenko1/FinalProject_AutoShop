@@ -1,30 +1,37 @@
 package com.tms.finalproject_autoshop.service;
 
 import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.model.dto.UserDto;
+import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
+import com.tms.finalproject_autoshop.model.dto.UserUpdateDto;
+import com.tms.finalproject_autoshop.repository.SecurityRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
+@Slf4j
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    //private final SecurityService securityServic
+    private final SecurityRepository securityRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, SecurityRepository securityRepository) {
         this.userRepository = userRepository;
-        //this.securityService = securityService;
+        this.securityRepository = securityRepository;
     }
 
     @Transactional
-    public Boolean createUser(UserDto userCreateDto) {
+    public Boolean createUser(UserCreateDto userCreateDto) {
         try {
             User newUser = new User();
             newUser.setFirstName(userCreateDto.getFirstName());
@@ -34,24 +41,32 @@ public class UserService {
             newUser.setCreated(LocalDateTime.now());
             newUser.setUpdated(LocalDateTime.now());
             userRepository.save(newUser);
+            return true;
         } catch (Exception ex) {
-            System.out.println("Error in saving user: " + ex.getMessage());
+            log.error("Error in saving user: " + ex.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
-        return true;
+
     }
 
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
-
     }
 
     @Transactional
-    public Optional<User> updateUser(User user) {
-        Optional<User> updateUser = getUserById(user.getId());
-        if (updateUser.isPresent()) {
-            return Optional.of(userRepository.saveAndFlush(user));
+    public Boolean updateUser(UserUpdateDto userUpdateDto, Long id) {
+        Optional<User> updatedUser = getUserById(id);
+        if (updatedUser.isPresent()) {
+            updatedUser.get().setFirstName(userUpdateDto.getFirstName());
+            updatedUser.get().setLastName(userUpdateDto.getLastName());
+            updatedUser.get().setEmail(userUpdateDto.getEmail());
+            userRepository.save(updatedUser.get());
+            return true;
         } else {
-            throw new NullPointerException();
+            log.error("User not found");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
     }
 
@@ -59,14 +74,33 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     public Boolean deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
+        try {
+            Optional<User> user = getUserById(id);
+            if (user.isEmpty()) {
+                return false;
+            }
+            securityRepository.delete(user.get().getSecurity());
             userRepository.deleteById(id);
             return true;
-        } else {
-            throw new NullPointerException(); //TODO: exception
+        } catch (Exception ex) {
+            log.error("User not found with id: " + id);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
     }
 
 
+    public List<User> getSortedUsersByField(String field, String order) {
+        if (order != null && !order.isBlank() && order.equals("desk")) {
+            return userRepository.findAll(Sort.by(Sort.Direction.DESC, field));
+        }
+        return userRepository.findAll(Sort.by(Sort.Direction.ASC, field));
+    }
+
+
+    public Page<User> getAllUsersWithPagination(int page, int size) {
+        return userRepository.findAll(PageRequest.of(page, size));
+    }
 }
