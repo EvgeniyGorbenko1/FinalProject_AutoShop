@@ -2,22 +2,23 @@ package com.tms.finalproject_autoshop.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tms.finalproject_autoshop.model.Category;
 import com.tms.finalproject_autoshop.model.SpareParts;
-import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.model.dto.PartDto;
+import com.tms.finalproject_autoshop.model.dto.CreatePartDto;
+import com.tms.finalproject_autoshop.model.dto.UpdatePartDto;
 import com.tms.finalproject_autoshop.repository.SparePartsRepository;
-import org.springframework.boot.json.GsonJsonParser;
-import org.springframework.http.converter.json.GsonBuilderUtils;
-import org.springframework.http.converter.json.GsonFactoryBean;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Logger;
 
+@Slf4j
 @Service
 public class SparePartsService {
     private final SparePartsRepository sparePartsRepository;
@@ -26,20 +27,23 @@ public class SparePartsService {
         this.sparePartsRepository = sparePartsRepository;
     }
 
-    public Boolean createPart(PartDto partDto) {
+    @Transactional
+    public Boolean createPart(CreatePartDto createPartDto) {
         try {
             SpareParts newSparePart = new SpareParts();
-            newSparePart.setName(partDto.getName());
-            newSparePart.setCategory(partDto.getCategory());
-            newSparePart.setPrice(partDto.getPrice());
-            newSparePart.setImage(partDto.getImage());
-            newSparePart.setDescription(partDto.getDescription());
-            newSparePart.setSpecifications(partDto.getSpecifications());
+            newSparePart.setName(createPartDto.getName());
+            newSparePart.setCategory(createPartDto.getCategory());
+            newSparePart.setPrice(createPartDto.getPrice());
+            newSparePart.setImage(createPartDto.getImage());
+            newSparePart.setDescription(createPartDto.getDescription());
+            newSparePart.setSpecifications(createPartDto.getSpecifications());
             sparePartsRepository.save(newSparePart);
+            return true;
         } catch (Exception ex) {
-            System.out.println("Error in saving user: " + ex.getMessage());
+            log.error("Error in saving part: " + ex.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
-        return true;
     }
 
     public Optional<SpareParts> getPartById(Long id) {
@@ -52,18 +56,28 @@ public class SparePartsService {
 
     public List<SpareParts> findByCategoryAndSpec(String category, Map<String, String> filter) throws JsonProcessingException {
         String specJson = new ObjectMapper().writeValueAsString(filter);
-        if(category == null || filter.isEmpty()) {
+        if (category == null || filter.isEmpty()) {
             throw new IllegalArgumentException("Category or Filter is null or Filter is empty");
         }
-        return sparePartsRepository.findOilByCategoryAndSpec(category, specJson);
+        return sparePartsRepository.findByCategoryAndSpec(category, specJson);
     }
 
-    public Optional<SpareParts> updateSpareParts(SpareParts spareParts) {
-        Optional<SpareParts> updatePartDB = getPartById(spareParts.getId());
+    @Transactional
+    public Boolean updateSpareParts(UpdatePartDto updatePartDto) {
+        Optional<SpareParts> updatePartDB = getPartById(updatePartDto.getId());
         if (updatePartDB.isPresent()) {
-            return Optional.of(sparePartsRepository.saveAndFlush(spareParts));
+            updatePartDB.get().setName(updatePartDto.getName());
+            updatePartDB.get().setCategory(updatePartDto.getCategory());
+            updatePartDB.get().setPrice(updatePartDto.getPrice());
+            updatePartDB.get().setImage(updatePartDto.getImage());
+            updatePartDB.get().setDescription(updatePartDto.getDescription());
+            updatePartDB.get().setSpecifications(updatePartDto.getSpecifications());
+            sparePartsRepository.save(updatePartDB.get());
+            return true;
         } else {
-            throw new NullPointerException();
+            log.error("SpareParts not found");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
     }
 
@@ -71,12 +85,31 @@ public class SparePartsService {
         return sparePartsRepository.findAll();
     }
 
+    @Transactional
     public Boolean deleteSparePart(Long id) {
-        if(sparePartsRepository.existsById(id)) {
+        try {
+            Optional<SpareParts> sparePartDB = getPartById(id);
+            if (sparePartDB.isEmpty()) {
+                return false;
+            }
             sparePartsRepository.deleteById(id);
             return true;
-        } else{
-            throw new NullPointerException(); //TODO: exception
+        } catch (Exception ex) {
+            log.error("SpareParts not found with id: " + id);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
     }
+
+
+public List<SpareParts> getSortedPartsByField(String field, String order) {
+    if (order != null && !order.isBlank() && order.equals("desc")) {
+        return sparePartsRepository.findAll(Sort.by(Sort.Direction.DESC, field));
+    }
+    return sparePartsRepository.findAll(Sort.by(Sort.Direction.ASC, field));
+}
+
+public Page<SpareParts> getAllSparePartsWithPagination(int page, int size) {
+    return sparePartsRepository.findAll(PageRequest.of(page, size));
+}
 }

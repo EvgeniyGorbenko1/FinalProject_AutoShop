@@ -3,7 +3,8 @@ package com.tms.finalproject_autoshop.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tms.finalproject_autoshop.model.Category;
 import com.tms.finalproject_autoshop.model.SpareParts;
-import com.tms.finalproject_autoshop.model.dto.PartDto;
+import com.tms.finalproject_autoshop.model.dto.CreatePartDto;
+import com.tms.finalproject_autoshop.model.dto.UpdatePartDto;
 import com.tms.finalproject_autoshop.service.SparePartsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,9 +48,9 @@ public class SparePartsController {
     public ResponseEntity<List<SpareParts>> getAllSpareParts() {
         List<SpareParts> spareParts = sparePartsService.getAllSpareParts();
         if (spareParts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
-        return new ResponseEntity<>(spareParts, HttpStatus.OK);
+        return ResponseEntity.ok(spareParts);
     }
 
     @Operation(
@@ -65,9 +67,9 @@ public class SparePartsController {
 
         List<SpareParts> sparePartsByCategory = sparePartsService.getPartByCategory(category);
         if (sparePartsByCategory.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(sparePartsByCategory, HttpStatus.OK);
+        return ResponseEntity.ok(sparePartsByCategory);
     }
 
     @Operation(
@@ -90,12 +92,12 @@ public class SparePartsController {
             try {
                 Category.valueOf(category);
             } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().build();
             }
         }
 
         List<SpareParts> result = sparePartsService.findByCategoryAndSpec(category, allParams);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
@@ -112,9 +114,9 @@ public class SparePartsController {
 
         Optional<SpareParts> spareParts = sparePartsService.getPartById(id);
         if (spareParts.isPresent()) {
-            return new ResponseEntity<>(spareParts, HttpStatus.OK);
+            return ResponseEntity.ok(spareParts);
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.notFound().build();
     }
 
     @Operation(
@@ -128,11 +130,12 @@ public class SparePartsController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<SpareParts> updateParts(
-            @Parameter(description = "Updated spare part object") @RequestBody SpareParts spareParts) {
-
-        Optional<SpareParts> updatedParts = sparePartsService.updateSpareParts(spareParts);
-        return updatedParts.map(parts -> new ResponseEntity<>(parts, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            @Parameter(description = "Updated spare part object") @RequestBody UpdatePartDto updatePartDTO) {
+        Boolean result = sparePartsService.updateSpareParts(updatePartDTO);
+        if (!result) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Operation(
@@ -146,13 +149,13 @@ public class SparePartsController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<HttpStatus> createPart(
-            @Parameter(description = "Spare part DTO") @RequestBody PartDto spareParts) {
+            @Parameter(description = "Spare part DTO") @RequestBody CreatePartDto spareParts) {
 
         Boolean result = sparePartsService.createPart(spareParts);
         if (!result) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(
@@ -170,8 +173,27 @@ public class SparePartsController {
 
         Boolean result = sparePartsService.deleteSparePart(id);
         if (!result) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/sort/{field}")
+    public ResponseEntity<List<SpareParts>> getSpareParts(@PathVariable String field, @RequestParam("order") String order) {
+        List<SpareParts> spareParts = sparePartsService.getSortedPartsByField(field, order);
+        if (spareParts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(spareParts);
+    }
+
+    @GetMapping("pagination/{page}/{size}")
+    public ResponseEntity<Page<SpareParts>> getSparePartsByPage(@PathVariable("page") int page, @PathVariable("size") int size) {
+        Page<SpareParts> spareParts = sparePartsService.getAllSparePartsWithPagination(page, size);
+        if (spareParts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(spareParts);
+    }
+
 }

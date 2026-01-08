@@ -24,7 +24,7 @@ public class SpareParts {
     private Long id;
     private String name;
     private String description;
-    private BigDecimal price;
+    private Double price;
     private String image;
     private Integer stock;
     @Enumerated(EnumType.STRING)

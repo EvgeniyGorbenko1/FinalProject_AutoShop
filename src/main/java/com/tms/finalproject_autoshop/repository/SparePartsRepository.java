@@ -18,7 +18,7 @@ public interface SparePartsRepository extends JpaRepository<SpareParts, Long> {
             SELECT * FROM spare_parts WHERE
                     (:category IS NULL OR category = :category )AND
                      (:specKeys)::jsonb <@ specifications""")
-    List<SpareParts> findOilByCategoryAndSpec(
+    List<SpareParts> findByCategoryAndSpec(
             @Param("category") String category,
             @Param("specKeys") String specKeysJson
     );
