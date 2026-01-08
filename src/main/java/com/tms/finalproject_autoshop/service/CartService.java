@@ -1,17 +1,13 @@
 package com.tms.finalproject_autoshop.service;
 
-import com.tms.finalproject_autoshop.model.Cart;
-import com.tms.finalproject_autoshop.model.CartItem;
-import com.tms.finalproject_autoshop.model.SpareParts;
-import com.tms.finalproject_autoshop.model.User;
-import com.tms.finalproject_autoshop.repository.CartItemRepository;
-import com.tms.finalproject_autoshop.repository.CartRepository;
-import com.tms.finalproject_autoshop.repository.SparePartsRepository;
-import com.tms.finalproject_autoshop.repository.UserRepository;
+import com.tms.finalproject_autoshop.model.*;
+import com.tms.finalproject_autoshop.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -22,12 +18,18 @@ public class CartService {
     private final UserRepository userRepository;
     private final SparePartsRepository sparePartsRepository;
     private final CartItemRepository cartItemRepository;
+    private final PromoRepository promoRepository;
+    private final PromoCodeService promoCodeService;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, SparePartsRepository sparePartsRepository, CartItemRepository cartItemRepository) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository,
+                       SparePartsRepository sparePartsRepository, CartItemRepository cartItemRepository,
+                       PromoRepository promoRepository, PromoCodeService promoCodeService) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.sparePartsRepository = sparePartsRepository;
         this.cartItemRepository = cartItemRepository;
+        this.promoRepository = promoRepository;
+        this.promoCodeService = promoCodeService;
     }
 
     public Optional<Cart> getCart(Long userId) {
@@ -53,6 +55,7 @@ public class CartService {
             return Optional.of(cartSaved);
         } catch (Exception ex) {
             log.error("Error creating cart");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Optional.empty();
         }
     }
@@ -92,7 +95,7 @@ public class CartService {
             item = new CartItem();
             item.setCart(cart.get());
             item.setProduct(product);
-            item.setQuantity(0);
+            item.setQuantity(quantity);
             cartItemRepository.save(item);
             return item;
         }
@@ -101,6 +104,31 @@ public class CartService {
         item.setQuantity(item.getQuantity() + quantity);
         cartItemRepository.save(item);
         return item;
+    }
+
+    public Double getTotalAmountWithPromoCode(Long userId, String promoCode) {
+        Optional<Cart> cart = getCart(userId);
+        if(cart.isEmpty()){
+            return 0.0;
+        }
+        Double totalAmount = cart.get().getTotalAmount();
+
+        if(promoCode == null || promoCode.isEmpty()){
+            return totalAmount;
+        }
+
+        Optional<PromoCode> promo = promoRepository.findByCode(promoCode);
+        if(promo.isEmpty()){
+            return totalAmount;
+        }
+        if(promo.get().getIsActive() == false) {
+            return totalAmount;
+        }
+        Double finalAmount = promoCodeService.applyPromo(promo.get(), totalAmount);
+
+        promo.get().setIsActive(false);
+        promoRepository.save(promo.get());
+        return finalAmount;
     }
 
 }

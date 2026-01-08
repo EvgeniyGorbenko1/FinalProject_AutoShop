@@ -1,6 +1,7 @@
 package com.tms.finalproject_autoshop.controller;
 
 import com.tms.finalproject_autoshop.model.Cart;
+import com.tms.finalproject_autoshop.model.PromoCode;
 import com.tms.finalproject_autoshop.security.CustomUserDetailService;
 import com.tms.finalproject_autoshop.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,8 @@ public class CartController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cart found",
                             content = @Content(schema = @Schema(implementation = Cart.class))),
-                    @ApiResponse(responseCode = "404", description = "Cart not found")
+                    @ApiResponse(responseCode = "404", description = "Cart not found"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")
             }
     )
     @GetMapping
@@ -54,7 +56,8 @@ public class CartController {
             description = "Creates a cart for the authenticated user if it does not exist",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cart created"),
-                    @ApiResponse(responseCode = "400", description = "Cart already exists or error occurred")
+                    @ApiResponse(responseCode = "400", description = "Cart already exists or error occurred"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")
             }
     )
     @PostMapping
@@ -73,7 +76,8 @@ public class CartController {
             description = "Removes a specific product from the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Item removed"),
-                    @ApiResponse(responseCode = "400", description = "Failed to remove item")
+                    @ApiResponse(responseCode = "400", description = "Failed to remove item"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")
             }
     )
     @DeleteMapping("/delete/{productId}")
@@ -94,7 +98,8 @@ public class CartController {
             description = "Removes all items from the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cart cleared"),
-                    @ApiResponse(responseCode = "400", description = "Failed to clear cart")
+                    @ApiResponse(responseCode = "400", description = "Failed to clear cart"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")
             }
     )
     @DeleteMapping("/clear")
@@ -112,7 +117,8 @@ public class CartController {
             description = "Adds a product to the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Item added"),
-                    @ApiResponse(responseCode = "400", description = "Failed to add item")
+                    @ApiResponse(responseCode = "400", description = "Failed to add item"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")
             }
     )
     @PostMapping("/add")
@@ -124,5 +130,18 @@ public class CartController {
         Long userId = CustomUserDetailService.getUserId();
         cartService.addToCart(userId, productId, quantity);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Apply promo code",
+            description = "Returns total cart amount with applied promo code",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Promo applied"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized")})
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/promo")
+    public ResponseEntity<?> getTotalAmountWithPromo(@RequestParam(required = false) String promoCode) {
+        Long userId = CustomUserDetailService.getUserId();
+        Double total = cartService.getTotalAmountWithPromoCode(userId, promoCode);
+        return ResponseEntity.ok(total);
     }
 }
