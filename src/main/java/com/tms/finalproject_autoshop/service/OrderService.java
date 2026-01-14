@@ -6,6 +6,7 @@ import com.tms.finalproject_autoshop.repository.CartRepository;
 import com.tms.finalproject_autoshop.repository.OrderRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import lombok.Data;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -58,23 +59,22 @@ public class OrderService {
 
     }
 
-    public void cancelOrder(Long orderId) throws Exception {
-        Optional<Order> order = Optional.ofNullable(orderRepository.findById(orderId));
+    public void cancelOrderByUserId(Long userId) throws Exception {
+        Optional<Order> order = orderRepository.findByUserId(userId);
         if(order.isEmpty()){
-            throw new Exception("Order not found");
+            throw new UsernameNotFoundException("User not found with id: " + userId);
         }
         orderRepository.delete(order.get());
-
+        orderRepository.save(order.get());
     }
 
-    public boolean changeStatus(Long orderId, OrderStatus newStatus) throws Exception {
+    public void changeStatus(Long orderId, OrderStatus newStatus) throws Exception {
         Order order = orderRepository.findById(orderId);
         if(order.getOrder().isEmpty()){
             throw new Exception("Order not found!");
         }
         order.setOrderStatus(newStatus);
         orderRepository.save(order);
-        return true;
     }
 
 }

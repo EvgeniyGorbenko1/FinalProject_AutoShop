@@ -54,7 +54,7 @@ public class OrderController {
     public ResponseEntity<Void> cancel(@PathVariable Long orderId) {
         try {
             Long userId = CustomUserDetailService.getUserId();
-            orderService.cancelOrderByUserId(orderId, userId);
+            orderService.cancelOrderByUserId(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             log.error("Cancel error", e);
