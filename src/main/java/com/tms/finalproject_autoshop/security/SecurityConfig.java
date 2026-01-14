@@ -41,8 +41,6 @@ public class SecurityConfig {
                                 .requestMatchers(pathBuilder.matcher("/v3/api-docs/**")).permitAll() //TODO: нужно указать ADMIN но мы не указали потому что в браузере нельзя просто добавить хедер
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.POST, "/security/jwt")).permitAll()
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/security/confirm")).permitAll()
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.DELETE, "/cart/delete")).permitAll()
-                                .requestMatchers(pathBuilder.matcher(HttpMethod.PATCH, "/{orderId}/status")).permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

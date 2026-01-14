@@ -13,7 +13,6 @@ import com.tms.finalproject_autoshop.repository.TokenRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import com.tms.finalproject_autoshop.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Transaction;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,18 +27,15 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class SecurityService {
-    private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final SecurityRepository securityRepository;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    public SecurityService(UserService userService,
-                           BCryptPasswordEncoder bCryptPasswordEncoder,
+    public SecurityService(BCryptPasswordEncoder bCryptPasswordEncoder,
                            SecurityRepository securityRepository,
                            JwtUtils jwtUtils, UserRepository userRepository, TokenRepository tokenRepository) {
-        this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.securityRepository = securityRepository;
         this.jwtUtils = jwtUtils;
@@ -99,31 +95,26 @@ public class SecurityService {
     }
 
     public Optional<String> generateJwt(AuthRequest authRequest) throws WrongPasswordException {
-        Optional<Security> security = securityRepository.getByUsername(authRequest.getUsername());
-        if (security.isEmpty()) {
-            throw new UsernameNotFoundException("username not found" + authRequest.getUsername());
-        }
-        if (!bCryptPasswordEncoder.matches(authRequest.getPassword(), security.get().getPassword())) {
+        Security security = securityRepository.getByUsername(authRequest.getUsername());
+        if (!bCryptPasswordEncoder.matches(authRequest.getPassword(), security.getPassword())) {
             throw new WrongPasswordException(authRequest.getPassword());
         }
 
-        return Optional.ofNullable(jwtUtils.getToken(security.get().getUsername()));
+        return Optional.ofNullable(jwtUtils.getToken(security.getUsername()));
     }
 
     public Optional<VerificationToken> findByToken(String token) {
         return tokenRepository.findByToken(token);
     }
 
-    public String createVerificationToken(String username) {
-        Security security = securityRepository.getByUsername(username)
-                .orElseThrow();
+    public void createVerificationToken(String username) {
+        Security security = securityRepository.getByUsername(username);
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setSecurity(security);
         verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
         tokenRepository.save(verificationToken);
-        return token;
     }
 
     public String getTokenByUsername(String username) {
