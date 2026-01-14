@@ -1,7 +1,7 @@
 package com.tms.finalproject_autoshop.controller;
 
 import com.tms.finalproject_autoshop.model.Catalog;
-import com.tms.finalproject_autoshop.model.dto.CatalogDto;
+import com.tms.finalproject_autoshop.model.dto.CreateCatalogDto;
 import com.tms.finalproject_autoshop.service.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +35,8 @@ public class CatalogController {
             description = "Returns a list of all catalog categories",
             responses = {
                     @ApiResponse(responseCode = "200", description = "List returned",
-                            content = @Content(schema = @Schema(implementation = Catalog.class)))
+                            content = @Content(schema = @Schema(implementation = Catalog.class))
+                    )
             }
     )
     @GetMapping
@@ -97,9 +98,9 @@ public class CatalogController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Void> createCatalog(
-            @Parameter(description = "Catalog DTO") @RequestBody CatalogDto catalogDto) {
+            @Parameter(description = "Catalog DTO") @RequestBody CreateCatalogDto createCatalogDto) {
 
-        Boolean result = catalogService.createCatalog(catalogDto);
+        Boolean result = catalogService.createCatalog(createCatalogDto);
         if (!result) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
