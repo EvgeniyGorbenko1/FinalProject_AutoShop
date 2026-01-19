@@ -1,0 +1,377 @@
+# Autoshop
+
+## Project Description
+
+**Autoshop application**  is a web application designed to manage an online auto parts store.
+The system includes user registration, shopping cart functionality, spare parts catalog management, promo code integration, order processing, file uploads, and email notifications.
+
+
+
+---
+
+## Main Features
+
+1. **User Management**:
+- CRUD operations for creating, editing and deleting user data.
+
+
+2. **Authentication and Authorization System**:
+- Registration and login for users.
+- Generating JWT tokens to secure API routes.
+
+3. **Catalog and SpareParts Management**:
+- Adding and editing data.
+- Support for sorting, filter and pagination.
+
+4. **Cart Management**:
+- CRUD operations for creating, editing and deleting data.
+- Ability to use promo.
+
+4. **Order Management**:
+- Operations for checking out, canceling and viewing status data.
+- Ability to use promo.
+
+5. **User Appointments**:
+- Adding an item to your cart, activating a promo code, and placing an order.
+- Automatic deletion of outdated records.
+
+6. **Added notifications by email**:
+- After registration, you will receive an SMS confirming your registration.
+
+7. **File Managenent**:
+- Uploading and storing catalog, parts pictures.
+
+8. **Added Promocodes**:
+- You can apply promo codes when placing an order to receive discounts.
+
+9. **Centralization of logging and monitoring**:
+- Connecting custom request logging via [LogInterceptor](./src/main/java/by/rublevskaya/interceptor/LogInterceptor.java).
+- AOP aspect TimingAspect for measuring method execution time.
+- Logging via @Slf4j
+10. **Security:**
+- Authentication and authorization using JWT.
+- Password hashing with BCrypt.
+11. **Database Migration:**
+- Using FlyWay for database version control and migration.
+- Database schema management with JPA and Hibernate.
+- Database: PostgreSQL (can be replaced with any other supported database).
+---
+
+
+
+
+## REST API Documentation
+
+## Overview
+
+This API provides a comprehensive set of endpoints for managing data
+
+## Base URL
+
+`http://localhost:8080`
+
+
+## Authentication
+
+The API provides authentication endpoints for both users and admin.
+
+### User Registration
+
+```http
+POST /security/registration
+```
+
+
+### Login
+
+```http
+POST /security/login
+```
+
+
+## Users
+
+### Create User
+
+```http
+POST /user
+```
+
+
+
+### Get All Users
+
+```http
+GET /user
+```
+
+### Get User by ID
+
+```http
+GET /user/{id}
+```
+
+### Update User(for authorized user)
+
+```http
+PUT /users/
+```
+
+### Delete User
+
+```http
+DELETE /users/{id}
+```
+
+## Spare Parts
+
+### Create SparePart
+
+```http
+POST /catalog/spare-parts
+```
+
+
+
+### Get All SpareParts
+
+```http
+GET /catalog/spare-parts
+```
+
+### Get SparePart by ID
+
+```http
+GET /catalog/spare-parts/{id}
+```
+
+### Update SparePart
+
+```http
+PUT /catalog/spare-parts/
+```
+
+
+
+### Get SpareParts with specific filters
+
+```http
+GET /catalog/spare-parts/filter
+```
+
+
+### Get SpareParts by Category
+
+```http
+GET /catalog/spare-parts/category/{category}
+```
+### Get SpareParts with pagination and sorting
+
+```http
+GET /catalog/spare-parts/pagination/{page}/{size}
+GET /catalog/spare-parts/sort/{field}
+```
+
+## Catalog
+
+### Get Catalog By ID
+
+```http
+GET /catalog/{id}
+```
+
+### Update Catalog
+
+```http
+PUT /catalog
+```
+
+### Create Catalog
+
+```http
+POST /catalog
+```
+
+### Delete Catalog
+
+```http
+DELETE /catalog/{id}
+```
+
+## Cart
+
+### Create Cart
+```http
+POST /cart
+```
+
+
+### Get Cart(for authorized user)
+
+```http
+GET /cart
+```
+
+### Clear Cart(for authorized user)
+
+```http
+DELETE /cart/clear
+```
+
+### Add Item to Cart(authorized user)
+
+```http
+PUT /cart/add
+```
+
+
+
+### Apply Promo Code to Cart(authorized user)
+
+```http
+PATCH /cart/promo
+```
+
+
+### Delete Cart Item
+
+```http
+DELETE /cart/delete/{productId}
+```
+
+## Orders
+
+### Checkout Order(for authorized user)
+
+```http
+POST /order/checkout
+```
+
+### Cancel Order(for authorized user)
+
+```http
+GET /order/cancel/{orderId}
+```
+
+### Update Order Status (Admin only)
+
+```http
+Patch /order/status/{orderId}
+```
+
+
+
+## PromoCode(admin only)
+
+### Create PromoCode
+
+```http
+PUT /promo
+```
+
+### Get All PromoCodes
+
+```http
+GET /promo
+```
+
+## Email Notifications
+
+### Send Email Notification
+
+```http
+GET /notify
+```
+
+## File
+
+### Upload File
+
+```http
+POST /file/upload
+```
+
+### Download File
+
+```http
+GET /file/{filename}
+```
+
+### Get All File Names
+
+```http
+GET /file
+```
+
+### Delete File
+
+```http
+DELETE /file/{filename}
+```
+
+
+
+## Actuator Endpoints
+
+
+
+### Application Info
+
+```http
+GET /actuator/info
+```
+
+## Notes
+
+1. All endpoints require proper authentication unless specified otherwise.
+2. Replace `{id}` and `{userId}` with actual IDs in the requests.
+3. Timestamps should be in ISO 8601 format (e.g., "2023-11-01T10:30:00").
+---
+
+## Architecture
+
+### Layers:
+1. **Controllers**:
+- Isolate the external API from the internal business logic.
+2. **Services**:
+- Implement the business logic of the system.
+3. **Repositories**:
+- Responsible for direct interaction with the database.
+4. **Entities**:
+- Describing database tables using JPA.
+5. **DTOs**:
+- Processing data for transfer between layers.
+
+---
+## Testing
+
+- DataBase DDL 
+- Postman collection
+
+---
+## Installation and launch
+
+### Requirements
+- Java 21+
+- Maven
+- PostgreSQL
+
+### Launching the project
+1. Clone the repository.
+2. Configure the database settings in the `application.properties` file.
+3. Compile the project:
+```shell script
+mvn clean install
+```
+4. Run the project:
+```shell script
+java -jar target/FinalProject_AutoShop-001-SNAPSHOP.jar
+```
+5. The application will be available on port `8081`.
+
+---
+
+## Contacts
+
+- Author: Evgeniy Gorbenko
+- Email: evgeniy.gorbenko2@gmail.com
