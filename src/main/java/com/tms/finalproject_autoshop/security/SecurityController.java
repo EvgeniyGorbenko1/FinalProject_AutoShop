@@ -167,7 +167,16 @@ public class SecurityController {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
-
+    @Operation(
+            summary = "User login",
+            description = "Authenticates user and returns JWT token",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login successful",
+                            content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request")
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest requestDto) {
         log.info("Received login request for user: {}", requestDto.getUsername());
