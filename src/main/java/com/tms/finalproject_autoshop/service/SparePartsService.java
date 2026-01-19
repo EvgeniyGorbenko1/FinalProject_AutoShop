@@ -41,7 +41,6 @@ public class SparePartsService {
             return true;
         } catch (Exception ex) {
             log.error("Error in saving part: " + ex.getMessage());
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
@@ -76,7 +75,6 @@ public class SparePartsService {
             return true;
         } else {
             log.error("SpareParts not found");
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
@@ -96,7 +94,6 @@ public class SparePartsService {
             return true;
         } catch (Exception ex) {
             log.error("SpareParts not found with id: " + id);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
