@@ -10,4 +10,8 @@ public class UserCreateDto {
     private String secondName;
     private String email;
     private int age;
+
+    public UserCreateDto() {
+
+    }
 }

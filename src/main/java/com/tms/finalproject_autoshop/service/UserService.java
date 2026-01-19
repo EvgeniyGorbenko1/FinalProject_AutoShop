@@ -1,14 +1,21 @@
 package com.tms.finalproject_autoshop.service;
 
+import com.tms.finalproject_autoshop.exception.CustomException;
+import com.tms.finalproject_autoshop.model.Security;
 import com.tms.finalproject_autoshop.model.User;
+import com.tms.finalproject_autoshop.model.dto.AuthRequest;
+import com.tms.finalproject_autoshop.model.dto.AuthResponse;
 import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
 import com.tms.finalproject_autoshop.model.dto.UserUpdateDto;
 import com.tms.finalproject_autoshop.repository.SecurityRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
+import com.tms.finalproject_autoshop.security.JwtUtils;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -24,10 +31,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final SecurityRepository securityRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
-    public UserService(UserRepository userRepository, SecurityRepository securityRepository) {
+    public UserService(UserRepository userRepository, SecurityRepository securityRepository, BCryptPasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
         this.securityRepository = securityRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
     @Transactional
@@ -44,7 +55,6 @@ public class UserService {
             return true;
         } catch (Exception ex) {
             log.error("Error in saving user: " + ex.getMessage());
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
 
@@ -65,7 +75,6 @@ public class UserService {
             return true;
         } else {
             log.error("User not found");
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
@@ -86,7 +95,6 @@ public class UserService {
             return true;
         } catch (Exception ex) {
             log.error("User not found with id: " + id);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }
@@ -103,4 +111,23 @@ public class UserService {
     public Page<User> getAllUsersWithPagination(int page, int size) {
         return userRepository.findAll(PageRequest.of(page, size));
     }
+
+    @Transactional
+    public AuthResponse loginUser(AuthRequest authRequest) {
+        log.info("Attempting to log in user: {}", authRequest.getUsername());
+
+        Security security = (Security) securityRepository.findByUsername(authRequest.getUsername())
+                .orElseThrow(() -> new CustomException("Invalid username or password"));
+
+        if (!passwordEncoder.matches(authRequest.getPassword(), security.getPassword())) {
+            log.error("Invalid password for login: {}", authRequest.getUsername());
+            throw new CustomException("Invalid username or password");
+        }
+
+        String token = jwtUtils.getToken(security.getUsername());
+
+        log.info("User '{}' successfully logged in.", security.getUsername());
+        return new AuthResponse(token);
+    }
+
 }
