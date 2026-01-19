@@ -22,24 +22,23 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Security> securityOptional = securityRepository.getByUsername(username);
-        if (securityOptional.isEmpty()) {
+        Security security = securityRepository.getByUsername(username);
+        if (security == null) {
             throw new UsernameNotFoundException("Username not found" + username);
         }
-        Security security = securityOptional.get();
-        return User
-                .withUsername(security.getUsername())
-                .password(security.getPassword())
-                .roles(security.getRole().name())
-                .build();
+        return new CustomUserDetails(security);
 
     }
 
     public static Long getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        CustomUserDetailService customUserDetailService = (CustomUserDetailService) authentication.getPrincipal();
-        assert customUserDetailService != null;
-        return getUserId();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getId();
+        }
+        throw new RuntimeException("Invalid principal type: " + principal.getClass());
     }
 }
