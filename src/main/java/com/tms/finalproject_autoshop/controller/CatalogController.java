@@ -31,24 +31,6 @@ public class CatalogController {
     }
 
     @Operation(
-            summary = "Get all catalog categories",
-            description = "Returns a list of all catalog categories",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "List returned",
-                            content = @Content(schema = @Schema(implementation = Catalog.class))
-                    )
-            }
-    )
-    @GetMapping
-    public ResponseEntity<List<Catalog>> getAllSpareParts() {
-        List<Catalog> catalogs = catalogService.getAllCatalogs();
-        if (catalogs.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(catalogs, HttpStatus.OK);
-    }
-
-    @Operation(
             summary = "Get catalog by ID",
             description = "Returns a catalog category by its ID",
             responses = {

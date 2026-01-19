@@ -13,8 +13,6 @@ import java.util.List;
 @Entity(name = "catalog")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"spare-parts"})
-@ToString(exclude = {"spare-parts"})
 public class Catalog {
     @Id
     @SequenceGenerator(name = "catalog_generator", sequenceName = "catalog_id_seq", allocationSize = 1)
