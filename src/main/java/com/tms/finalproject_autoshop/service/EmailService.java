@@ -33,7 +33,8 @@
              log.info("Email sent successfully");
          } catch (MessagingException e){
              log.info("Email sent failed");
+
          }
-         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+         return null;
      }
  }
