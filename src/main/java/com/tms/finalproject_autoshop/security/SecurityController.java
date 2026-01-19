@@ -139,7 +139,7 @@ public class SecurityController {
     @PostMapping("/registration")
     public ResponseEntity<HttpStatusCode> registration(
             @Valid @RequestBody UserRegistrationDto userRegistrationDto,
-            BindingResult bindingResult) throws UsernameUsedException {
+            BindingResult bindingResult) throws UsernameUsedException, ValidationException {
 
         if (bindingResult.hasErrors()) {
             List<String> errMessages = new ArrayList<>();
@@ -148,7 +148,7 @@ public class SecurityController {
                 log.warn(objectError.toString());
                 errMessages.add(objectError.getDefaultMessage());
             }
-            throw new jakarta.validation.ValidationException(String.valueOf(errMessages));
+            throw new ValidationException(String.valueOf(errMessages));
         }
 
         if (securityService.registration(userRegistrationDto)) {

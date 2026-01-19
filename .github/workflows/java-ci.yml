@@ -44,3 +44,5 @@ jobs:
           name: autoshop-app
           path: target/*.jar
           if-no-files-found: error
+      - name: Build Docker image
+        run: docker build -t evgeniygorbeko/autoshop:1.1 .

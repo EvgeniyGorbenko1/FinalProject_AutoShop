@@ -5,9 +5,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=Root
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: Root
     image: postgres:latest
     networks:
       - backend
