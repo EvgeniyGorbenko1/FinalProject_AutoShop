@@ -15,5 +15,6 @@ public class PromoCode {
     @Column(nullable = false)
     private Double discount;
 
+
     private Boolean isActive = true;
 }
