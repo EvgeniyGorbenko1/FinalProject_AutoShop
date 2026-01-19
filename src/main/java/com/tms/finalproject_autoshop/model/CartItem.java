@@ -21,5 +21,9 @@ public class CartItem {
     @JoinColumn(name = "cart_id")
     private Cart cart;
 
+    public Double getTotalPrice() {
+        return product.getPrice() * quantity;
+    }
+
 
 }

@@ -168,6 +168,14 @@ public class SecurityController {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest requestDto) {
+        log.info("Received login request for user: {}", requestDto.getUsername());
+        AuthResponse responseDto = userService.loginUser(requestDto);
+        log.info("Login successful for user: {}", requestDto.getUsername());
+        return ResponseEntity.ok(responseDto);
+    }
+
     @Operation(
             summary = "Set user role to ADMIN",
             description = "ADMIN only",

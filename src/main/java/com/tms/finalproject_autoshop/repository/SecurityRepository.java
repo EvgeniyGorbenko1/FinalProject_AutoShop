@@ -23,4 +23,6 @@ public interface SecurityRepository extends JpaRepository<Security, Long> {
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE security SET role = 'ADMIN' WHERE user_id = :userId")
     int setAdminRoleByUserId(Long userId);
+
+    Optional<Object> findByUsername(String username);
 }

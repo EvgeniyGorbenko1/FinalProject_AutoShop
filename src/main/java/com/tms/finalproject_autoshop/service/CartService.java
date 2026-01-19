@@ -5,9 +5,7 @@ import com.tms.finalproject_autoshop.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -55,12 +53,11 @@ public class CartService {
             return Optional.of(cartSaved);
         } catch (Exception ex) {
             log.error("Error creating cart");
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Optional.empty();
         }
     }
 
-    public boolean removeItem(Long productId, Long userId) throws Exception {
+    public boolean removeItem(Long productId, Long userId) {
         Optional<Cart> cart = getCart(userId);
         if (cart.isEmpty()) {
             return false;
@@ -82,10 +79,10 @@ public class CartService {
     }
 
     @Transactional
-    public CartItem addToCart(Long userId, Long productId, int quantity) {
+    public boolean addToCart(Long userId, Long productId, int quantity) {
         Optional<Cart> cart = getCart(userId);
         if (cart.isEmpty()) {
-            return null;
+            return false;
         }
         SpareParts product = sparePartsRepository.findById(productId)
                 .orElseThrow();
@@ -97,38 +94,38 @@ public class CartService {
             item.setProduct(product);
             item.setQuantity(quantity);
             cartItemRepository.save(item);
-            return item;
+            return true;
         }
 
 
         item.setQuantity(item.getQuantity() + quantity);
         cartItemRepository.save(item);
-        return item;
+        return true;
     }
 
-    public Double getTotalAmountWithPromoCode(Long userId, String promoCode) {
+    public Optional<Double> getTotalAmountWithPromoCode(Long userId, String promoCode) {
         Optional<Cart> cart = getCart(userId);
         if(cart.isEmpty()){
-            return 0.0;
+            return Optional.empty();
         }
         Double totalAmount = cart.get().getTotalAmount();
 
         if(promoCode == null || promoCode.isEmpty()){
-            return totalAmount;
+            return Optional.of(totalAmount);
         }
 
         Optional<PromoCode> promo = promoRepository.findByCode(promoCode);
         if(promo.isEmpty()){
-            return totalAmount;
+            return Optional.of(totalAmount);
         }
         if(promo.get().getIsActive() == false) {
-            return totalAmount;
+            return Optional.of(totalAmount);
         }
         Double finalAmount = promoCodeService.applyPromo(promo.get(), totalAmount);
 
         promo.get().setIsActive(false);
         promoRepository.save(promo.get());
-        return finalAmount;
+        return Optional.of(finalAmount);
     }
 
 }

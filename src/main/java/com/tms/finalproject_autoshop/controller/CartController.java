@@ -56,8 +56,7 @@ public class CartController {
             description = "Creates a cart for the authenticated user if it does not exist",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cart created"),
-                    @ApiResponse(responseCode = "400", description = "Cart already exists or error occurred"),
-                    @ApiResponse(responseCode = "403", description = "Unauthorized")
+                    @ApiResponse(responseCode = "400", description = "Cart already exists or error occurred")
             }
     )
     @PostMapping
@@ -66,7 +65,7 @@ public class CartController {
         Long userId = CustomUserDetailService.getUserId();
         Optional<Cart> cart = cartService.createCart(userId);
         if (cart.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED).body(cart.get());
         }
         return ResponseEntity.badRequest().build();
     }
@@ -76,15 +75,14 @@ public class CartController {
             description = "Removes a specific product from the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Item removed"),
-                    @ApiResponse(responseCode = "400", description = "Failed to remove item"),
-                    @ApiResponse(responseCode = "403", description = "Unauthorized")
+                    @ApiResponse(responseCode = "400", description = "Failed to remove item")
             }
     )
     @DeleteMapping("/delete/{productId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteItem(
             @Parameter(description = "ID of the product to remove")
-            @PathVariable Long productId) throws Exception {
+            @PathVariable Long productId) {
 
         Long userId = CustomUserDetailService.getUserId();
         if (cartService.removeItem(productId, userId)) {
@@ -98,8 +96,7 @@ public class CartController {
             description = "Removes all items from the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cart cleared"),
-                    @ApiResponse(responseCode = "400", description = "Failed to clear cart"),
-                    @ApiResponse(responseCode = "403", description = "Unauthorized")
+                    @ApiResponse(responseCode = "400", description = "Failed to clear cart")
             }
     )
     @DeleteMapping("/clear")
@@ -117,8 +114,7 @@ public class CartController {
             description = "Adds a product to the user's cart",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Item added"),
-                    @ApiResponse(responseCode = "400", description = "Failed to add item"),
-                    @ApiResponse(responseCode = "403", description = "Unauthorized")
+                    @ApiResponse(responseCode = "400", description = "Failed to add item")
             }
     )
     @PostMapping("/add")
@@ -128,20 +124,25 @@ public class CartController {
             @Parameter(description = "Quantity to add") @RequestParam int quantity) {
 
         Long userId = CustomUserDetailService.getUserId();
-        cartService.addToCart(userId, productId, quantity);
-        return ResponseEntity.ok().build();
+        if(cartService.addToCart(userId, productId, quantity)){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @Operation(summary = "Apply promo code",
             description = "Returns total cart amount with applied promo code",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Promo applied"),
-                    @ApiResponse(responseCode = "403", description = "Unauthorized")})
+                    @ApiResponse(responseCode = "200", description = "Promo applied")
+            }
+    )
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/promo")
     public ResponseEntity<?> getTotalAmountWithPromo(@RequestParam(required = false) String promoCode) {
         Long userId = CustomUserDetailService.getUserId();
-        Double total = cartService.getTotalAmountWithPromoCode(userId, promoCode);
-        return ResponseEntity.ok(total);
+        Optional<Double> total = cartService.getTotalAmountWithPromoCode(userId, promoCode);
+        return total.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
+
     }
 }
