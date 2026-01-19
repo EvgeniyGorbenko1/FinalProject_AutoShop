@@ -130,7 +130,15 @@ public class UserController {
         }
         return ResponseEntity.noContent().build();
     }
-
+    @Operation(
+            summary = "Get sorted users",
+            description = "Returns a list of users sorted by specified field and order (ADMIN only)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List returned"),
+                    @ApiResponse(responseCode = "204", description = "No users found")
+            }
+    )
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sort/{field}")
     public ResponseEntity<List<User>> getSortedUsersByField(@PathVariable("field") String field, @RequestParam("order") String order) {
         List<User> users = userService.getSortedUsersByField(field, order);
@@ -139,7 +147,15 @@ public class UserController {
         }
         return ResponseEntity.ok(users);
     }
-
+    @Operation(
+            summary = "Get paginated users",
+            description = "Returns a paginated list of users (ADMIN only)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Page returned"),
+                    @ApiResponse(responseCode = "204", description = "No users found")
+            }
+    )
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pagination/{page}/{size}")
     public ResponseEntity<Page<User>> getAllUsersWithPagination(@PathVariable("page") int page, @PathVariable("size") int size) {
         Page<User> users = userService.getAllUsersWithPagination(page, size);
