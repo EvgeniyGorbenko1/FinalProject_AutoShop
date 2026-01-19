@@ -2,8 +2,9 @@
 
 ## Project Description
 
-**Autoshop application**  is a web application designed to manage an online auto parts store.
-The system includes user registration, shopping cart functionality, spare parts catalog management, promo code integration, order processing, file uploads, and email notifications.
+**Autoshop**  is a backend application for an online auto store.
+The system supports user registration, an auto parts catalog, a shopping cart, order placement, promo codes, file uploads, and email notifications.
+The project is built on Spring Boot 3.5 and implements a modern architecture with JWT authentication, roles, logging, and a Docker infrastructure.
 
 
 
@@ -250,7 +251,7 @@ POST /order/checkout
 ### Cancel Order(for authorized user)
 
 ```http
-GET /order/cancel/{orderId}
+DELETE /order/cancel/{orderId}
 ```
 
 ### Update Order Status (Admin only)
