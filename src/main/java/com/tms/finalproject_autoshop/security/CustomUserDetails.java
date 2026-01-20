@@ -1,6 +1,7 @@
 package com.tms.finalproject_autoshop.security;
 
 import com.tms.finalproject_autoshop.model.Security;
+import com.tms.finalproject_autoshop.model.User;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(Security security) {
-        this.id = security.getId();
+        this.id = security.getUser().getId();
         this.username = security.getUsername();
         this.password = security.getPassword();
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + security.getRole().name()));
