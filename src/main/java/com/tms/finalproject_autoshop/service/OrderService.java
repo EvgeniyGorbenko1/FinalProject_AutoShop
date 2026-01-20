@@ -32,8 +32,8 @@ public class OrderService {
     }
 
     public void checkout(Long userId) throws CartException {
-        Cart cart = cartRepository.findById(userId)
-                .orElse(new Cart());
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(CartException::new);
         if(cart.getItems().isEmpty()){
             throw new CartException();
         }
