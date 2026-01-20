@@ -55,8 +55,8 @@ public class SparePartsService {
 
     public List<SpareParts> findByCategoryAndSpec(String category, Map<String, String> filter) throws JsonProcessingException {
         String specJson = new ObjectMapper().writeValueAsString(filter);
-        if (category == null || filter.isEmpty()) {
-            throw new IllegalArgumentException("Category or Filter is null or Filter is empty");
+        if (category == null && filter.isEmpty()) {
+            throw new IllegalArgumentException("At least one filter must be provided");
         }
         return sparePartsRepository.findByCategoryAndSpec(category, specJson);
     }
