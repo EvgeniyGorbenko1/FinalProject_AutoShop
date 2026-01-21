@@ -1,12 +1,11 @@
 package com.tms.finalproject_autoshop.model.dto;
 
 import com.tms.finalproject_autoshop.model.Category;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Map;
+
 @Data
-@AllArgsConstructor
 public class UpdatePartDto {
     private Long id;
     private String name;
