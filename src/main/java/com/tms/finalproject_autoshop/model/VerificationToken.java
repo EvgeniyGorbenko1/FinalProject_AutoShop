@@ -16,7 +16,7 @@ public class VerificationToken {
     @Column(nullable = false, unique = true)
     private String token;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "security_id")
     private Security security;
 
