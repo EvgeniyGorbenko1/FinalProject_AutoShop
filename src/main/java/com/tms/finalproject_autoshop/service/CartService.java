@@ -36,14 +36,14 @@ public class CartService {
 
     @Transactional
     public Optional<Cart> createCart(Long userId) {
-        try{
+        try {
             Optional<User> user = userRepository.findById(userId);
-            if(user.isEmpty()){
+            if (user.isEmpty()) {
                 log.error("User not found");
                 return Optional.empty();
             }
             Optional<Cart> cart = cartRepository.findByUserId(userId);
-            if(cart.isPresent()){
+            if (cart.isPresent()) {
                 return cart;
             }
 
@@ -62,9 +62,9 @@ public class CartService {
         if (cart.isEmpty()) {
             return false;
         }
-            cart.get().getItems().removeIf(item -> item.getProduct().getId().equals(productId));
-            cartRepository.save(cart.get());
-            return true;
+        cart.get().getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        cartRepository.save(cart.get());
+        return true;
 
     }
 
@@ -73,9 +73,9 @@ public class CartService {
         if (cart.isEmpty()) {
             return false;
         }
-            cart.get().getItems().clear();
-            cartRepository.save(cart.get());
-            return true;
+        cart.get().getItems().clear();
+        cartRepository.save(cart.get());
+        return true;
     }
 
     @Transactional
@@ -105,20 +105,20 @@ public class CartService {
 
     public Optional<Double> getTotalAmountWithPromoCode(Long userId, String promoCode) {
         Optional<Cart> cart = getCart(userId);
-        if(cart.isEmpty()){
+        if (cart.isEmpty()) {
             return Optional.empty();
         }
         Double totalAmount = cart.get().getTotalAmount();
 
-        if(promoCode == null || promoCode.isEmpty()){
+        if (promoCode == null || promoCode.isEmpty()) {
             return Optional.of(totalAmount);
         }
 
-        Optional<PromoCode> promo = promoRepository.findByCode(promoCode);
-        if(promo.isEmpty()){
+        Optional<PromoCode> promo = promoCodeService.findByCode(promoCode);
+        if (promo.isEmpty()) {
             return Optional.of(totalAmount);
         }
-        if(promo.get().getIsActive() == false) {
+        if (promo.get().getIsActive() == false) {
             return Optional.of(totalAmount);
         }
         Double finalAmount = promoCodeService.applyPromo(promo.get(), totalAmount);
