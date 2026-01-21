@@ -1,7 +1,6 @@
 package com.tms.finalproject_autoshop.security;
 
 import com.tms.finalproject_autoshop.model.Security;
-import com.tms.finalproject_autoshop.model.User;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
