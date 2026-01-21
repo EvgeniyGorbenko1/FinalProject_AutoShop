@@ -1,12 +1,10 @@
 package com.tms.finalproject_autoshop.model.dto;
 
 import com.tms.finalproject_autoshop.model.Category;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Map;
 
-@AllArgsConstructor
 @Data
 public class CreatePartDto {
     private String name;
