@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Component
 public class JwtUtils {
-    @Value("60")
+    @Value("${expire}")
     private String jwtExpirationMinutes;
-@Value("d7e0ff8c3b8fcacb5c4e3ea330b962e25f14096520995778cf7a18f61188f156714d9622006b1b42c13602f44760356992cb8fa5f4862cc8c5f3eef639ee78bb")
+    @Value("${secret}")
     private String secretKey;
 
     public String getToken(String username) {
@@ -29,7 +30,7 @@ public class JwtUtils {
         log.info("IN JwtUtils::validateToken");
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-        } catch (JwtException e){
+        } catch (JwtException e) {
             log.error(e.getMessage());
             return false;
         } finally {

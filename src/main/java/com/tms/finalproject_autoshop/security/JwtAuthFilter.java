@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Optional;
+
 @Component
 @Slf4j
 public class JwtAuthFilter implements Filter {
