@@ -89,6 +89,30 @@ POST /security/registration
 POST /security/login
 ```
 
+### Get JWT Token
+
+```http
+GET /security/jwt
+```
+
+### Confirm Email
+
+```http
+GET /security/confirm?token={token}
+```
+
+###Get Security info by Id
+
+```http
+GET /security/{id}
+```
+
+### Grant Admin Role (Admin only)
+
+```http
+POST /security/{id}/admin
+```
+
 
 ## Users
 
@@ -123,6 +147,17 @@ PUT /users/
 ```http
 DELETE /users/{id}
 ```
+### Get Users with Pagination
+
+```http
+GET /user/pagination/{page}/{size}
+```
+
+### Sort Users by Field
+
+```http
+GET /user/sort/{field}
+``` 
 
 ## Spare Parts
 
@@ -131,8 +166,6 @@ DELETE /users/{id}
 ```http
 POST /catalog/spare-parts
 ```
-
-
 
 ### Get All SpareParts
 
@@ -174,6 +207,11 @@ GET /catalog/spare-parts/sort/{field}
 ```
 
 ## Catalog
+### Get All Catalogs
+
+```http
+GET /catalog
+```
 
 ### Get Catalog By ID
 
@@ -260,7 +298,23 @@ DELETE /order/cancel/{orderId}
 Patch /order/status/{orderId}
 ```
 
+### Get All Orders (Admin only)
 
+```http
+GET /order
+```
+
+### Get My Orders (for authorized user)
+
+```http
+GET /order/my
+``` 
+
+### Get Order by ID
+
+```http
+GET /order/{Id}
+```
 
 ## PromoCode(admin only)
 
@@ -270,10 +324,21 @@ Patch /order/status/{orderId}
 PUT /promo
 ```
 
+### Get PromoCode by ID
+
+```http
+GET /promo/{id}
+```
+
 ### Get All PromoCodes
 
 ```http
 GET /promo
+```
+### Delete PromoCode
+
+```http
+DELETE /promo/{id}
 ```
 
 ## Email Notifications
