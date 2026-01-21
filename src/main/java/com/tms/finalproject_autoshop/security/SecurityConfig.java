@@ -1,4 +1,5 @@
 package com.tms.finalproject_autoshop.security;
+
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +38,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(pathBuilder.matcher(HttpMethod.POST, "/security/registration")).permitAll()
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.POST, "/security/login")).permitAll()
-                                .requestMatchers(pathBuilder.matcher("/swagger-ui/**")).permitAll() //TODO: нужно указать ADMIN но мы не указали потому что в браузере нельзя просто добавить хедер
-                                .requestMatchers(pathBuilder.matcher("/v3/api-docs/**")).permitAll() //TODO: нужно указать ADMIN но мы не указали потому что в браузере нельзя просто добавить хедер
+                                .requestMatchers(pathBuilder.matcher("/swagger-ui/**")).permitAll()
+                                .requestMatchers(pathBuilder.matcher("/v3/api-docs/**")).permitAll()
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.POST, "/security/jwt")).permitAll()
                                 .requestMatchers(pathBuilder.matcher(HttpMethod.GET, "/security/confirm")).permitAll()
                                 .anyRequest().authenticated())

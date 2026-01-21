@@ -167,6 +167,7 @@ public class SecurityController {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
+
     @Operation(
             summary = "User login",
             description = "Authenticates user and returns JWT token",
@@ -178,7 +179,7 @@ public class SecurityController {
             }
     )
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest requestDto) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest requestDto) {
         log.info("Received login request for user: {}", requestDto.getUsername());
         AuthResponse responseDto = userService.loginUser(requestDto);
         log.info("Login successful for user: {}", requestDto.getUsername());

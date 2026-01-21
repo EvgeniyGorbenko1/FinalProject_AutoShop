@@ -11,7 +11,6 @@ import com.tms.finalproject_autoshop.model.dto.UserRegistrationDto;
 import com.tms.finalproject_autoshop.repository.SecurityRepository;
 import com.tms.finalproject_autoshop.repository.TokenRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
-import com.tms.finalproject_autoshop.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
