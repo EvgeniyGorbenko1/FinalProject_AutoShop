@@ -1,6 +1,5 @@
 package com.tms.finalproject_autoshop.exception;
 
-import lombok.Data;
 
 public class UsernameUsedException extends Exception {
     private String username;

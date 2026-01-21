@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
-    @ExceptionHandler(value = { UsernameUsedException.class })
+    @ExceptionHandler(value = {UsernameUsedException.class})
     public ResponseEntity<HttpStatusCode> usernameUsedException(UsernameUsedException e) {
         log.info("UsernameUsedException" + e.getUsername());
         return new ResponseEntity<>(HttpStatus.IM_USED);

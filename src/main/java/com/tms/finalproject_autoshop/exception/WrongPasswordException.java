@@ -2,6 +2,7 @@ package com.tms.finalproject_autoshop.exception;
 
 public class WrongPasswordException extends Exception {
     private final String wrongPassword;
+
     public WrongPasswordException(String wrongPassword) {
         this.wrongPassword = wrongPassword;
     }
