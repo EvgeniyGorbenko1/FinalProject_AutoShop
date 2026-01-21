@@ -1,7 +1,6 @@
 package com.tms.finalproject_autoshop.controller;
 
 import com.tms.finalproject_autoshop.model.Cart;
-import com.tms.finalproject_autoshop.model.PromoCode;
 import com.tms.finalproject_autoshop.security.CustomUserDetailService;
 import com.tms.finalproject_autoshop.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -124,7 +123,7 @@ public class CartController {
             @Parameter(description = "Quantity to add") @RequestParam int quantity) {
 
         Long userId = CustomUserDetailService.getUserId();
-        if(cartService.addToCart(userId, productId, quantity)){
+        if (cartService.addToCart(userId, productId, quantity)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
