@@ -10,7 +10,6 @@ import com.tms.finalproject_autoshop.model.dto.UserUpdateDto;
 import com.tms.finalproject_autoshop.repository.SecurityRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import com.tms.finalproject_autoshop.security.JwtUtils;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

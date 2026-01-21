@@ -6,11 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 @Data
-public class
-UserRegistrationDto {
+public class UserRegistrationDto {
     @NotBlank
     @Size(min = 3, max = 20)
     private String username;

@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+
 @Entity(name = "users")
 @Data
-@NoArgsConstructor
 @EqualsAndHashCode(exclude = "security")
 @ToString(exclude = "security")
 public class User {
@@ -28,6 +27,6 @@ public class User {
     private LocalDateTime updated;
 
     @JsonIgnore
-    @OneToOne(optional = false, mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(optional = false, mappedBy = "user")
     private Security security;
 }

@@ -4,7 +4,6 @@ import com.tms.finalproject_autoshop.model.User;
 import com.tms.finalproject_autoshop.model.dto.UserCreateDto;
 import com.tms.finalproject_autoshop.model.dto.UserUpdateDto;
 import com.tms.finalproject_autoshop.security.CustomUserDetailService;
-import com.tms.finalproject_autoshop.security.CustomUserDetails;
 import com.tms.finalproject_autoshop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -130,6 +129,7 @@ public class UserController {
         }
         return ResponseEntity.noContent().build();
     }
+
     @Operation(
             summary = "Get sorted users",
             description = "Returns a list of users sorted by specified field and order (ADMIN only)",
@@ -147,6 +147,7 @@ public class UserController {
         }
         return ResponseEntity.ok(users);
     }
+
     @Operation(
             summary = "Get paginated users",
             description = "Returns a paginated list of users (ADMIN only)",
