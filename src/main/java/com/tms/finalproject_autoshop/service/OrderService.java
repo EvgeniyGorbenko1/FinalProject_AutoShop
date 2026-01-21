@@ -6,7 +6,6 @@ import com.tms.finalproject_autoshop.repository.CartRepository;
 import com.tms.finalproject_autoshop.repository.OrderRepository;
 import com.tms.finalproject_autoshop.repository.UserRepository;
 import lombok.Data;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,10 +19,9 @@ import static com.tms.finalproject_autoshop.model.OrderStatus.CREATED;
 @Service
 public class OrderService {
 
-    private OrderRepository orderRepository;
-    private CartRepository cartRepository;
-    private UserRepository userRepository;
-
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
+    private final UserRepository userRepository;
 
     public OrderService(OrderRepository orderRepository, CartRepository cartRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
@@ -34,9 +32,11 @@ public class OrderService {
     public void checkout(Long userId) throws CartException {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(CartException::new);
-        if(cart.getItems().isEmpty()){
+
+        if (cart.getItems().isEmpty()) {
             throw new CartException();
         }
+
         Order order = new Order();
         order.setUser(cart.getUser());
         order.setOrderDate(LocalDateTime.now());
@@ -50,31 +50,44 @@ public class OrderService {
             orderItem.setPrice(item.getProduct().getPrice());
             orderItems.add(orderItem);
         }
-        order.setOrder(orderItems);
+
+        order.setItems(orderItems);
         order.setOrderStatus(CREATED);
         orderRepository.save(order);
 
         cart.getItems().clear();
         cartRepository.save(cart);
-
     }
 
-    public void cancelOrderByUserId(Long userId) throws Exception {
+    public Optional<Order> cancelOrderByUserId(Long userId) {
         Optional<Order> order = orderRepository.findByUserId(userId);
-        if(order.isEmpty()){
-            throw new UsernameNotFoundException("User not found with id: " + userId);
-        }
-        orderRepository.delete(order.get());
-        orderRepository.save(order.get());
+        order.ifPresent(orderRepository::delete);
+        return order;
+    }
+
+    public Optional<Order> cancelOrderById(Long orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        order.ifPresent(orderRepository::delete);
+        return order;
     }
 
     public void changeStatus(Long orderId, OrderStatus newStatus) throws Exception {
-        Order order = orderRepository.findById(orderId);
-        if(order.getOrder().isEmpty()){
-            throw new Exception("Order not found!");
-        }
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new Exception("Order not found!"));
+
         order.setOrderStatus(newStatus);
         orderRepository.save(order);
     }
 
+    public Optional<Order> getOrderByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    public Optional<Order> findByOrderId(Long id) {
+        return orderRepository.findById(id);
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
 }
