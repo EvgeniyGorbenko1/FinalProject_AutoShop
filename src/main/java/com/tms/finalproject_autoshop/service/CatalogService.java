@@ -59,17 +59,14 @@ public class CatalogService {
 
     @Transactional
     public Boolean deleteCatalog(Long id) {
-        try {
-            Optional<Catalog> catalogDb = catalogRepository.getCatalogById(id);
-            if (catalogDb.isPresent()) {
-                catalogRepository.deleteById(id);
-                return true;
-            }
-        } catch (Exception ex) {
+        Optional<Catalog> catalogDb = catalogRepository.getCatalogById(id);
+        if (catalogDb.isPresent()) {
+            catalogRepository.deleteById(id);
+            return true;
+        } else {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("Catalog id not found");
             return false;
         }
-        return false;
     }
 }

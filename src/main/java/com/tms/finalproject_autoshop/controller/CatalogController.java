@@ -30,6 +30,13 @@ public class CatalogController {
         this.catalogService = catalogService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<Catalog>> getAllCatalogs() {
+        List<Catalog> catalogs = catalogService.getAllCatalogs();
+        return catalogs.isEmpty() ? ResponseEntity.notFound().build()
+                : new ResponseEntity<>(catalogs, HttpStatus.OK);
+    }
+
     @Operation(
             summary = "Get catalog by ID",
             description = "Returns a catalog category by its ID",

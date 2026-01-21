@@ -1,18 +1,15 @@
 package com.tms.finalproject_autoshop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.Collection;
-import java.util.List;
+
 
 @Entity(name = "catalog")
 @Data
-@NoArgsConstructor
 public class Catalog {
     @Id
     @SequenceGenerator(name = "catalog_generator", sequenceName = "catalog_id_seq", allocationSize = 1)
@@ -21,9 +18,8 @@ public class Catalog {
     private String name;
     private String image;
     private String description;
-    @JsonBackReference
-    @OneToMany(mappedBy = "catalog", fetch = FetchType.EAGER)
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "catalog", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Collection<SpareParts> spareParts;
-
-
 }
