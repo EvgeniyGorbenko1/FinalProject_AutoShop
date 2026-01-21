@@ -1,19 +1,17 @@
 package com.tms.finalproject_autoshop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 @Data
-@NoArgsConstructor
 @Entity(name = "spare_parts")
 @EqualsAndHashCode(exclude = {"catalog"})
 @ToString(exclude = {"catalog"})
@@ -27,17 +25,16 @@ public class SpareParts {
     private Double price;
     private String image;
     private Integer stock;
+
     @Enumerated(EnumType.STRING)
     private Category category;
-    //Характеристики продукта
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> specifications;
 
-    @JsonBackReference
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "catalog_id")
     private Catalog catalog;
-
-
 }

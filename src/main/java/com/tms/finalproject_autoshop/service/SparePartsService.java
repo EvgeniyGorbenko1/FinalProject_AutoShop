@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.List;
 import java.util.Map;
@@ -99,14 +98,14 @@ public class SparePartsService {
     }
 
 
-public List<SpareParts> getSortedPartsByField(String field, String order) {
-    if (order != null && !order.isBlank() && order.equals("desc")) {
-        return sparePartsRepository.findAll(Sort.by(Sort.Direction.DESC, field));
+    public List<SpareParts> getSortedPartsByField(String field, String order) {
+        if (order != null && !order.isBlank() && order.equals("desc")) {
+            return sparePartsRepository.findAll(Sort.by(Sort.Direction.DESC, field));
+        }
+        return sparePartsRepository.findAll(Sort.by(Sort.Direction.ASC, field));
     }
-    return sparePartsRepository.findAll(Sort.by(Sort.Direction.ASC, field));
-}
 
-public Page<SpareParts> getAllSparePartsWithPagination(int page, int size) {
-    return sparePartsRepository.findAll(PageRequest.of(page, size));
-}
+    public Page<SpareParts> getAllSparePartsWithPagination(int page, int size) {
+        return sparePartsRepository.findAll(PageRequest.of(page, size));
+    }
 }
